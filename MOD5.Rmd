@@ -1,0 +1,335 @@
+---
+title: "Lista do Módulo 5"
+author: "Mariana Soares Carneiro - 11811EBI012"
+output: 
+  html_document:
+    highlight: tango
+    includes:
+      after_body: psbfix.html
+---
+
+# Módulo 5
+
+### Exercício 1
+> Considerando os dados disponíveis no arquivo “MODULO5.xlsx”, que podem ser visualizados abaixo, responda às questões:
+
+
+```{R}
+library(openxlsx) # biblioteca para abrir arquivo do excel
+library(dygraphs)
+
+fname <- 'MODULO5.xlsx' # nome do arquivo, incluindo o caminho (observe que o caminho depende de onde você salvou o arquivo em seu computador)
+
+df <- readWorkbook(fname,
+                   sheet = 1,
+                   detectDates = TRUE) # faz a leitura do arquivo de dados
+
+str(df) # visualização das variáveis disponíveis no data frame (df)
+```
+
+```{r}
+dfplot <- data.frame(time=df$time, ch1 =df$chan.1, ch2 = df$chan.2 )
+  dygraph(dfplot)%>%dyRangeSelector()
+```
+
+## a) Qual a relação sinal-ruído do período entre 0 e 14 segundos. Faça a estimativa para os canais ch1 e ch2.Dica: Utilize o valor RMS para o cálculo.
+
+```{r}
+#Salvando os trechos de ruídos dos canais do período entre 0 e 14 segundos
+c1a <- df$chan.1[which(df$time>=0) & (df$time<=14)]
+c2a <- df$chan.2[which(df$time>=0) & (df$time<=14)]
+#Salva os primeiros bursts de sinal dos canais
+B1 <- df$chan.1[which(df$time >= 46 & df$time <= 46.9)]
+B2 <- df$chan.2[which(df$time >= 45 & df$time <= 45.9)]
+#função para estimar RMS
+rms <- function(x){
+ s<-sum(x^2)
+ s<-s/length(x)
+ s<-sqrt(s)
+ return(s)
+}
+#Canal 1
+(rmsR <- rms(B1)) #valor RMS do sinal
+```
+
+```{r}
+(rmsB <- rms(c1a)) #valor RMS do ruído
+```
+
+```{r}
+#Canal 2
+(rmsR <- rms(B2)) #valor RMS do sinal
+```
+
+```{r}
+(rmsB <- rms(c2a)) #valor RMS do ruído
+```
+
+```{r}
+#Relação sinal-ruído canal 1
+v1 <- (rmsB <- rms(B1)) #valor RMS do sinal
+n1 <- (rmsN <- rms(c1a)) #valor RMS do ruído
+relsrc1 <- 20*log(v1/n1)
+cat("Relação sinal-ruído canal 1:", relsrc1, "dB" )
+```
+
+```{r}
+#Relação sinal-ruído canal 2
+v2 <- (rmsB <- rms(B2)) #valor RMS do sinal
+n2 <- (rmsN <- rms(c2a)) #valor RMS do ruído
+relsrc2 <- 20*log(v2/n2)
+cat("Relação sinal-ruído canal 2:", relsrc2, "dB" )
+```
+
+#### b) Faça uma comparação entre os trechos de ruído 1 (entre 0 e 14 s) e ruído 2 (entre 18 e 43 s). Faça a estimativa para os canais ch1 e ch2. Dica: Utilize o valor RMS para o cálculo e apreente os resultados em dB.
+
+```{r}
+#Salvando os trechos de ruídos dos canais do período entre 18 e 43 segundos
+c1b <- df$chan.1[which(df$time>=18 & df$time<=43)]
+c2b <- df$chan.2[which(df$time>=18 & df$time<=43)]
+#-----------------------------------------------------------------------------
+#Canal 1
+(rmsc1b <- rms(c1b)) #valor RMS do ruído
+```
+
+```{r}
+#Canal 2
+(rmsc2b <- rms(c2b)) #valor RMS do ruído
+```
+
+```{r}
+#Relação sinal-ruído canal 1
+n2 <- (rmsc1b <- rms(c1b)) #valor RMS do ruído
+relsrc1b <- 20*log(v1/n2)
+cat("Relação sinal-ruído canal 1:", relsrc1b, "dB" )
+```
+
+```{r}
+#Relação sinal-ruído canal 2
+n3 <- (rmsc2b <- rms(c2b)) #valor RMS do ruído
+relsrc2b <- 20*log(v2/n3)
+cat("Relação sinal-ruído canal 2:", relsrc2b, "dB" )
+```
+
+```
+O período entre 0 e 14 segundos possui uma relação sinal-ruído maior o que a do período de 18 a 43
+```
+
+#### c) Para cada um dos canais (ch1 e ch2) estimate o valor da tendência linear constante. O cálculo deve ser feito de forma independente para os trechos de ruído 1 e 2, e para o trecho de sinal (de 45 a 334 s).
+
+```{r}
+#Calculando a tendencia linear do Ruído 1
+tlp1 <- mean(n1)#trecho 0 a 14s
+tls1 <- mean(c1b)#trecho de 18 a 43s
+
+#Calculando a tendencia linear do Ruído 2
+tlp2 <- mean(n2)#trecho 0 a 14s
+tls2 <- mean(c2b)#trecho de 18 a 43s
+
+#Calculando a tendencia linear do trecho de sinal (de 45 a 334 s)
+s_chan1 <- df$chan.1[which(df$time>=45 & df$time<=334)]
+s_chan2 <- df$chan.2[which(df$time>=45 & df$time<=334)]
+tl_chanl1 <- mean(s_chan1)
+tl_chanl2 <- mean(s_chan2)
+
+cat("Tendência linear do ruído 1:","\n", "1) do período entre 0 e 14 segundos, é: ", tlp1,"\n", "2) do período entre 18 e 43 segundos, é:", tls1, "\n")
+
+```
+
+```{r}
+cat("Tendência linear do ruído 2:","\n", "1) do período entre 0 e 14 segundos, é: ", tlp2,"\n", "2) do período entre 18 e 43 segundos, é:", tls2, "\n")
+```
+
+```{r}
+cat("Tendência linear do trecho do sinal 1 (45 a 334 s):",tl_chanl1,"\n","Tendência linear do trecho do sinal 1 (45 a 334 s):", tl_chanl2, "\n")
+```
+
+#### d) Existe alguma discontinuidade nos sinais dos canais 1 e 2? Justifique a sua resposta por meio do uso de um boxplot. Considere em sua análise o trecho de 0 a 40 s.
+
+```{r}
+library(plotly)
+#Análise de 0 a 40 segundos
+Canal1 <- df$chan.1[which(df$time >= 0 & df$time <= 40)]
+Canal2 <- df$chan.2[which(df$time >= 0 & df$time <= 40)]
+
+#Boxplot para o trecho de 0 a 40 segundos
+descontinuidade <- plot_ly(y = Canal1, type = "box", color= "#3399cc", name = "Canal 1") %>%
+ add_trace(y = Canal2, color = "#02cc86",name = "Canal 2")
+descontinuidade
+```
+
+```{r}
+#Detectando descontinuidades de forma independente
+#utilizando o parametro BoxPlot
+trecho <- which(df$time >= 0 & df$time <= 40)
+#Canal 1 no trecho de 0 a 40 segundos
+boxplot_chan.1 <- boxplot(df$chan.1[trecho], plot = FALSE)
+boxplot_chan.1$stats
+```
+
+```{r}
+Q3 <- boxplot_chan.1$stats[4] #Terceiro quartil
+Q1 <- boxplot_chan.1$stats[2] #Primeiro quartil
+IQR <- Q3 - Q1 #Distância interquartil
+h <- 1.5 * IQR #Limiar para deteção de outliers
+UIF <- Q3 + h #Limiar superior para detecção de outlier
+LIF <- Q1 - h #Limiar inferior para detecção de outlier
+df1 <- data.frame(Time = df$time[trecho], Sinal = df$chan.1[trecho])
+df1$UIF <- NA
+df1$LIF <- NA
+# Amplitude do sinal é maior que o limiar
+indxUIF <- which(df$chan.1[trecho] > UIF)
+# Amplitudes dos índices de interesse
+df1$UIF[indxUIF] <- df$chan.1[indxUIF]
+indxLIF <- which(df$chan.1[trecho] < LIF)
+df1$LIF[indxLIF] <- df$chan.1[indxLIF]
+dygraph(df1, main = "Outliers no Canal 1") %>%
+ dySeries(name = "UIF", drawPoints = TRUE, color = "#fa8072" ) %>%
+ dySeries(name = "LIF", drawPoints = TRUE, color = "#a151d6") %>%
+ dyOptions(pointSize = 2) %>%
+ dyRangeSelector()
+
+```
+
+```{r}
+#Canal 2 no trecho de 0 a 40 segundos
+boxplot_chan.2 <- boxplot(df$chan.2[trecho], plot = FALSE)
+boxplot_chan.2$stats
+```
+
+```{r}
+#Determinando outliers os pontos que estão acima do limite superior e inferior da IQR
+Q3 <- boxplot_chan.2$stats[4] #Terceiro quartil
+Q1 <- boxplot_chan.2$stats[2] #Primeiro quartil
+IQR <- Q3 - Q1 #Distância interquartil
+h <- 1.5 * IQR #Limiar para deteção de outliers
+UIF <- Q3 + h #Limiar superior para detecção de outlier
+LIF <- Q1 - h #Limiar inferior para detecção de outlier
+df2 <- data.frame(Time = df$time[trecho], Sinal = df$chan.2[trecho])
+df2$UIF <- NA
+df2$LIF <- NA
+#Salvando os índices em que a amplitude do sinal é maior que o limiar
+indxUIF <- which(df$chan.2[trecho] > UIF)
+#Salvando as amplitudes dos índices de interesse
+df2$UIF[indxUIF] <- df$chan.2[indxUIF]
+indxLIF <- which(df$chan.2[trecho] < LIF)
+df2$LIF[indxLIF] <- df$chan.2[indxLIF]
+dygraph(df2, main = "Outliers do canal 2") %>%
+ dySeries(name = "Sinal", color = "#008080" ) %>%
+ dySeries(name = "UIF", drawPoints = TRUE, color = "#be29ec" ) %>%
+ dySeries(name = "LIF", drawPoints = TRUE, color = "#ffa54f") %>%
+ dyOptions(pointSize = 2) %>%
+ dyRangeSelector()
+```
+
+```
+Existem descontinuidades em ambos dos canais durante o trecho delimitado.
+```
+
+#### e) Caso exista alguma discontinuidade no sinal (ver letra d) faça a remoção da mesma por meio do método de interpolação linear.Gere um gráfico que ilustre o trecho do sinal com e sem a descontinuidade.
+
+```{r}
+#Criando uma função que realize uma interpolação linear
+linearInterp <- function(x0,y0,x1,y1,x)
+{
+ y <- y0 + (y1-y0)*(x-x0)/(x1-x0)
+
+ return(y)
+}
+
+#Dados do Canal 1
+#Armazenando as descontinuidades
+tdisc <- sort(c(which(is.na(df1$LIF) == FALSE, arr.ind = TRUE), which(is.na(df1$UIF) == FALSE, arr.ind = TRUE)))
+
+#Fazendo a interpolação
+data_chan1 <- list(tdisc = tdisc,
+ tseg = df1$Time[tdisc],
+ chan.1 = df1$Sinal[tdisc])
+x0 <- df1$Time[data_chan1$tdisc-1]
+y0 <- df1$Sinal[data_chan1$tdisc-1]
+x1 <- df1$Time[data_chan1$tdisc+1]
+y1 <- df1$Sinal[data_chan1$tdisc+1]
+x <- df1$Time[data_chan1$tdisc] 
+y <- linearInterp(x0, y0, x1, y1, x)
+df1$Interpolação <- NA
+df1$Interpolação[data_chan1$tdisc] <- y
+dygraph(df1, main = "Interpolação linear para remoção de descontinuidades do canal 1") %>%
+ dySeries(name="UIF", drawPoints=TRUE, color = "#800080" ) %>%
+ dySeries(name="LIF", drawPoints=TRUE, color = "#d62976") %>%
+ dySeries(name="Interpolação", drawPoints=TRUE, color = "#4f5bd5") %>%
+ dyOptions(pointSize = 2) %>%
+ dyRangeSelector()
+```
+
+```{r}
+#Dados do Canal 2
+#Armazenando as descontinuidades
+tdisc <- sort(c(which(is.na(df2$LIF) == FALSE, arr.ind = TRUE),
+ which(is.na(df2$UIF) == FALSE, arr.ind = TRUE)))
+#Fazendo a interpolação
+data_chanl2 <- list(tdisc = tdisc, tseg = df2$Time[tdisc], chan.2 = df2$Sinal[tdisc])
+x0 <- df2$Time[data_chanl2$tdisc-1]
+y0 <- df2$Sinal[data_chanl2$tdisc-1]
+x1 <- df2$Time[data_chanl2$tdisc+1]
+y1 <- df2$Sinal[data_chanl2$tdisc+1]
+x <- df2$Time[data_chanl2$tdisc]
+y <- linearInterp(x0, y0, x1, y1, x)
+df2$Interpolação <- NA
+df2$Interpolação[data_chanl2$tdisc] <- y
+dygraph(df2, main = "Interpolação linear para remoção de descontinuidades do canal 2") %>%
+ dySeries(name="UIF", drawPoints=TRUE, color = "#ff0000" ) %>%
+ dySeries(name="LIF", drawPoints=TRUE, color = "#0bd3d3") %>%
+ dySeries(name="Interpolação", drawPoints=TRUE, color = "#f0c75e") %>%
+ dyOptions(pointSize = 2) %>%
+ dyRangeSelector()
+```
+
+#### f) Os sinais apresentados nos canais 1 e 2 são de tempo e valores contínuos. Essa afirmação é verdadeira ou falsa? Justifique.
+
+```
+Falsa. Os sinais apresentados apresentam descontinuidade (o que pode ser observado graficamente).
+```
+
+#### g) Desafio: leia o conceito de variável independente e identicamente distribuída (iid) disponível em [link](https://www.statisticshowto.datasciencecentral.com/iid-statistics/). Utilize a fução **diffsign.test** disponível na biblioteca **spgs** para verificar se os trechos de sinais compreendidos entre 0 e 8 s, entre 20 e 40 s, e entre 45 e 334 s, são iid. Justifique a razão de um trecho ser ou não iid.
+
+```
+Variáveis são consideradas independentes quando comportamentos passados não interferem comportamento futuro. Já uma variável que é identicamente distribuída tem todas as amostras provenientes da mesma distribuição. Para que seja uma i.i.d. cada variável deve ter a mesma distribuição aleatória que as demais e todas sejam mutuamente independentes.
+```
+
+```{r}
+library(spgs)
+#Canal 1
+#trechos de sinais compreendidos entre 0 e 8 s
+diffsign.test(df$chan.1[which(df$time <= 8)])
+
+```
+
+```{r}
+#trechos de sinais compreendidos entre 20 e 40s
+diffsign.test(df$chan.1[which(df$time >= 20 & df$time <= 40)])
+```
+
+```{r}
+#trechos de sinais compreendidos entre 45 e 334s
+diffsign.test(df$chan.1[which(df$time >= 45 & df$time <= 334)])
+```
+
+```{r}
+#Canal 2
+#trechos de sinais compreendidos entre 0 e 8 s
+diffsign.test(df$chan.2[which(df$time <= 8)])
+```
+
+```{r}
+#trechos de sinais compreendidos entre 20 e 40s
+diffsign.test(df$chan.2[which(df$time >= 20 & df$time <= 40)])
+```
+
+```{r}
+#trechos de sinais compreendidos entre 45 e 334s
+diffsign.test(df$chan.2[which(df$time >= 45 & df$time <= 334)])
+```
+
+```
+Com o p value menor do que 0.05 não temos uma série i.i.d., já quando o p value é maior do que 0.05 sim. Sendo assim, pode-se afirmar que o trecho de 0 a 8 segundos é i.i.d. no canal 1 e no canal 2 nenhum dos trechos é i.i.d..
+```

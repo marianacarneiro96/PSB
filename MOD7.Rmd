@@ -1,0 +1,399 @@
+---
+title: "Lista do Módulo 7"
+author: "Mariana Soares Carneiro - 11811EBI012"
+output: 
+  html_document:
+    highlight: tango
+    includes:
+      after_body: psbfix.html
+---
+
+# Módulo 7
+
+### Exercício 1
+> Gere um sinal amostrado a partir de uma distribuição normal, com amplitudade variando entre 0 e 1, de duração de 10 s, e amostrado a 5 kHz. Ilustre o processo de janelamento sem sobreposição aplicado a este sinal. A duração de cada janela deverá ser de 500 ms. O sinal gerado, e o instante de início e fim de cada janela deverão ser plotados utilizando-se a biblioteca gráfica dyraphs. Dica: a função dyEvent pode ser utilizada para gerar linhas verticais em instantes desejados. Veja o trecho de código abaixo que ilustra esta situação. O resultado do gráfico gerado deve ser apresentado como parte do relatório.
+
+```{R}
+library(dygraphs)
+library(tuneR)
+# Gerando o Sinal
+fs <- 5000
+dt <- 1/fs
+tf <- 10
+t <- seq(from = 0, to = tf, by = dt)
+y <- noise(kind = "white", samp.rate = fs, duration = tf+dt, xunit = "time")@left
+# Identificando e passando os valores negativos para positivos
+indxNegativo <- which(y<0)
+y[indxNegativo] <- y[indxNegativo]*(-1)
+# Janelando o sinal
+Nwnd <- 500
+N <- (Nwnd/1000)*fs
+# Gerando vetor com os pontos iniciais de cada janela
+ponto1 <- seq(from = 1, to = 47501, by = N)
+# Gerando vetor com os pontos finais de cada janela
+ponto2 <- ponto1 + (N-1)
+# Inicio e final do janelamento em segundos
+ponto1 <- (ponto1 - 1) / 5000
+ponto2 <- ponto2 / 5000
+# Gerando um vetor com o tempo de início
+ponto1_p <- rep(NA, length(t))
+for (i in 1:length(ponto1))
+{
+  x <- ponto1[i]
+  ponto1_p[i] <- x
+}
+# Geranto um vetor com o tempo final 
+ponto2_p <- rep(NA, length(t))
+for (i in 1:length(ponto2))
+{
+  x <- ponto2[i]
+  ponto2_p[i] <- x
+}
+# Convertendo para vetores de caracteres
+ponto1_p <- as.character(ponto1_p)
+ponto2_p <- as.character(ponto2_p)
+# Inserindo no data frame
+df <- data.frame(time = t, signal = y, ponto1_p, ponto2_p)
+# Plotando o gráfico
+dygraph(df[c("time", "signal")], main = "Sinal com Janelamento", xlab = "Tempo(s)", ylab = "A
+mplitude") %>%
+  dyRangeSelector() %>%
+  dyEvent(ponto1_p, color = "#4d0244", strokePattern = "solid" ) %>%
+  dyEvent(ponto2_p, color = "#ff00d5", strokePattern = "solid")
+```
+
+### Exercício 2
+> Considerando o problema da questão 1, altere a duração da janela para 1.000 ms, e apresente a solução para o mesmo problema adotando-se a sobreposição de janelas de 50%. O resultado do gráfico gerado deve ser apresentado como parte do relatório.
+
+
+```{R}
+library(dygraphs)
+library(tuneR)
+# Gerando o Sinal
+fs <- 5000
+dt <- 1/fs
+tf <- 10
+t <- seq(from = 0, to = tf, by = dt)
+y <- noise(kind = "white", samp.rate = fs, duration = tf+dt, xunit = "time")@left
+# Identificando valores negativos e passando para positivos
+indxNegativo <- which(y<0)
+y[indxNegativo] <- y[indxNegativo]*(-1)
+y_2 <- y
+t_2 <- t
+# Parâmetros para janelamento do sinal
+Nwnd <- 1000
+N <- (Nwnd / 1000) * fs
+# seg.length = tamanho da janela (em amostras)
+# overlap = número de amostras para sobreposição
+splitWithOverlap <- function(y, seg.length, overlap) {
+  vec <- 1:length(y)
+  starts = seq(1, length(vec), by=seg.length-overlap)
+  ends = starts + seg.length - 1
+  ends[ends > length(vec)] = length(vec) # índice final não ultrapassará o tamanho do vetor
+  
+  
+  ly <- lapply(1:length(starts),
+               function(i)
+                 if( (ends[i]-starts[i]+1) == seg.length){
+                   y <- vec[starts[i]:ends[i]]
+                 }
+  )
+  
+  
+  ly[!sapply(ly, is.null)] #removendo elementos NULL da lista 
+  
+}
+wngSeg <- splitWithOverlap (y, seg.length = N, overlap = ceiling(N/2))
+pulsoret1 <- rep(0, length(t_2)) 
+pulsoret1[wngSeg[[1]]] <- 1
+pulsoret2 <- rep(0, length(t_2)) 
+pulsoret2[wngSeg[[2]]] <- 1
+pulsoret3 <- rep(0, length(t_2)) 
+pulsoret3[wngSeg[[3]]] <- 1
+pulsoret4 <- rep(0, length(t_2)) 
+pulsoret4[wngSeg[[4]]] <- 1
+pulsoret5 <- rep(0, length(t_2)) 
+pulsoret5[wngSeg[[6]]] <- 1
+pulsoret6 <- rep(0, length(t_2)) 
+pulsoret6[wngSeg[[6]]] <- 1
+# variáveis do tipo pulsoret irão inicializar um vetor com zeros, gerando o pulso retangular
+df <- data.frame(time = t, y, pulsoret1 + 2, pulsoret2 - 2, pulsoret3 + 2, pulsoret4 - 2, pulsoret5 + 2, pulsoret6 - 2)
+dygraph(df, main = " Sinal com Janelamento com Sobreposição", xlab = "Tempo (s)", ylab = "Amplitude") %>% dyRangeSelector()
+```
+
+### Exercício 3
+> Na seção Estimativa de parâmetros ao longo do tempo foi dado um exemplo de como diferentes características captam informações distintas dos sinais. Explique que tipo de informação é mensurada pelas estatísticas: rms, média, desvio padrão, variância.
+
+
+```
+RMS significa Root Mean Square e descreve a amplitude média a partir de valores absolutos em cada instante de tempo. Já a média mostra onde estão concentrados os dados de uma amostra. Desvio padrão expressa o grau de dispersão de um conjunto de dados, enquanto que a variância é utilizada para representar a dispersão em relação à média.
+```
+
+### Exercício 4
+> Gere um sinal sintético que represente a atividade eletromiográfica. Este sinal deve ser amostrado a 1 kHz e a sua duração deve ser de 1 segundo. Adicione ao sinal gerado uma componente linear e outra não linear. Desenvolva uma função que remova essas componentes do sinal corrompido. Como parte da solução, você deverá apresentar o gráfico do sinal simulado (sem qualquer tendência), o gráfico do sinal simulado com a presença da tendência linear, o gráfico do sinal simulado com a presença das tendências linear e não linear, e finalmente o gráfico do sinal após a remoção das tendências.
+
+```{R}
+library(tuneR)
+library(dygraphs)
+library(ggplot2)
+# Função que realiza o janelamento com sobreposição
+splitWithOverlap <- function(y, seg.length, overlap) {
+  vec <- 1:length(y)
+  starts = seq(1, length(vec), by=seg.length-overlap)
+  ends = starts + seg.length - 1
+  ends[ends > length(vec)] = length(vec) # índice final não ultrapassará o tamanho do vetor
+  
+  
+  ly <- lapply(1:length(starts),
+               function(i)
+                 if( (ends[i]-starts[i]+1) == seg.length){
+                   y <- vec[starts[i]:ends[i]]
+                 }
+  )
+  ly[!sapply(ly, is.null)] #removendo elementos nulos da lista, retornando assim os elementos não nulos
+}
+#Gerando sinal EMG
+fs <- 1000
+dt <- 1/fs
+tf <- 1
+t <- seq(from = 0, to= tf, by = dt)
+freqSquare <- 10
+ysquare <- square(freqSquare, samp.rate = fs, duration = tf+dt, xunit = "time")@left
+dygraph(data.frame(time=t, ysquare)) %>% dyRangeSelector()
+```
+
+```{R}
+ynoise <- noise(kind = "white", samp.rate = fs, duration = tf+dt, xunit = "time")@left
+indx1 <- which(ysquare == -1.0)
+signal_EMG <- rep(NA, length(ynoise))
+signal_EMG[indx1] <- ynoise[indx1]
+indx2 <- which(ysquare > -1.0)
+signal_EMG[indx2] <- ynoise[indx2]*20
+df_EMG <- data.frame(time = t, signal = signal_EMG)
+dygraph(df_EMG, main = "Sinal EMG Sintético", xlab = "Tempo", ylab = "Amplitude (mV)") %>% 
+  dyRangeSelector()
+```
+
+```{R}
+# Tendência linear
+y_linear <- rep(0, length(t))
+for (i in 1:length(t)){
+ y_linear[i] <- (5 + 10*t[i]) + signal_EMG[i]
+}
+qplot(t, y_linear, geom = "line")
+```
+
+```{R}
+# Estimando parâmetros estatísticos para o sinal com tendência linear
+Nwnd <- 20
+N <- (Nwnd/1000)*fs
+wngSeg <- splitWithOverlap(y_linear, seg.length = N, overlap = ceiling(N/2))
+tc <- rep(NA, length(wngSeg))
+v.media <- rep(NA, length(wngSeg))
+v.rms <- rep(NA, length(wngSeg))
+v.sd <- rep(NA, length(wngSeg))
+v.var <- rep(NA, length(wngSeg))
+for(i in 1:length(wngSeg)){
+ tc[i] <- mean(wngSeg[[i]])*dt
+ v.media[i] <- mean(y_linear[wngSeg[[i]]])
+ v.rms[i] <- sqrt(sum(y_linear[wngSeg[[i]]] * y_linear[wngSeg[[i]]]) / length(wngSeg[[i]]))
+ v.sd[i] <- sd(y_linear[wngSeg[[i]]])
+ v.var[i] <- var(y_linear[wngSeg[[i]]])
+}
+qplot(tc, v.media)
+qplot(tc, v.rms)
+qplot(tc, v.sd)
+qplot(tc, v.var)
+```
+
+```{R}
+# Remoção da tendência linear
+df_linear <- data.frame(time=t, y_linear)
+linearMod <- lm(y_linear ~ t, data = df_linear)
+print(linearMod)
+```
+
+```{R}
+distPred <- predict(linearMod, df_linear)
+plot(df_linear$time, df_linear$y_linear, type='l' )
+lines(df_linear$time, distPred, type = 'l' , col = 'green')
+```
+
+```{R}
+plot(df_linear$time, df_linear$y_linear-distPred, type='l' )
+```
+
+```{R}
+# Adicionando tendência não linear
+y_naolinear <- rep(0,length(t))
+for (i in 1:length(t)){
+ y_naolinear[i] <- sin(2*pi*t[i]*0.8) + signal_EMG[i]
+}
+qplot(t, y_naolinear, geom = "line")
+
+```
+
+```{R}
+# Estimando parâmetros estatísticos para o sinal com tendência não linear
+Nwnd <- 20
+N <- (Nwnd/1000)*fs
+wngSeg <- splitWithOverlap(y_linear, seg.length = N, overlap = ceiling(N/2))
+tc <- rep(NA, length(wngSeg))
+v.media <- rep(NA, length(wngSeg))
+v.rms <- rep(NA, length(wngSeg))
+v.sd <- rep(NA, length(wngSeg))
+v.var <- rep(NA, length(wngSeg))
+for(i in 1:length(wngSeg)){
+  tc[i] <- mean(wngSeg[[i]])*dt
+ v.media[i] <- mean(y_naolinear[wngSeg[[i]]])
+ v.rms[i] <- sqrt(sum(y_naolinear[wngSeg[[i]]] * y_naolinear[wngSeg[[i]]]) / length(wngSeg
+[[i]]))
+ v.sd[i] <- sd(y_naolinear[wngSeg[[i]]])
+ v.var[i] <- var(y_naolinear[wngSeg[[i]]])
+}
+qplot(tc, v.media)
+qplot(tc, v.rms)
+qplot(tc, v.sd)
+qplot(tc, v.var)
+```
+
+```{R}
+# Remoção da tendência linear
+df_naolinear <- data.frame(time=t, y_naolinear)
+fit.lm <- lm(y_naolinear ~ poly(time,5), data = df_naolinear)
+fit <- fitted(fit.lm)
+plot(df_naolinear$time, df_naolinear$y_naolinear, type='l',
+ main = "Sinal com tendência não linear",
+ ylab = "Amplitude",
+ xlab = "Tempo (s)")
+lines(df_naolinear$time, fit, col = 'pink')
+```
+
+```{R}
+plot(df_naolinear$time, df_naolinear$y_naolinear-fit, type='l',
+ main = "Sinal com tendência não linear",
+ ylab = "Amplitude",
+ xlab = "Tempo (s)")
+```
+
+### Exercício 5
+> Faça um programa que ilustre o conceito de média coerente. Este programa deverá considerar a média de 10 séries temporais, de 20 amostras cada uma. Gere gráficos que ilustrem os resultados obtidos.
+
+```{R}
+library(dygraphs)
+fs <- 100
+dt <- 1/fs
+df <- 20
+t <- seq(0, df, dt)
+df<- data.frame(time = t, ch1= NA, ch2= NA, ch3= NA, ch4= NA, ch5= NA, ch6= NA, ch7= NA, ch8=
+NA, ch9= NA, ch10= NA)
+for (idx in 1:10) {
+
+ y1 <- sin(2*pi*t*2)
+ noise <- runif(length(t), -0.3,0.3)
+ df[idx+1] <- y1 + noise
+}
+dfplot <- data.frame(time = df$time, ch1=df$ch1, ch2=df$ch2, ch3=df$ch3, ch4=df$ch4, ch5=df$ch5, ch6=df$ch6, ch7=df$ch7, ch8=df$ch8, ch9=df$ch9, ch10=df$ch10)
+dygraph(dfplot)
+rep.now <- function(x,n){
+ A <- matrix(NA, nrow = n, ncol = length(x))
+ for(i in 1:n){
+ A[i, ] <- x + rnorm(length(x))
+ }
+ return(A)
+}
+```
+
+### Exercício 6
+> Encontre a convolução entre as duas sequências x[n]={▶2,2,4} e h[n]={▶1,1,1,1,1}. O símbolo ▶ indica o zero. Apresente todos os passos da solução, tal como ilustrado neste módulo.
+
+```{R echo=FALSE}
+knitr::include_graphics("ex6.png")
+```
+
+### Exercício 7
+> Encontre a convolução entre as duas sequências x[n]={2,▶1,−2,3,−4} e h[n]={▶3,2,2,1,4}. O símbolo ▶ indica o zero. Apresente todos os passos da solução, tal como ilustrado neste módulo.
+
+```{R echo=FALSE}
+knitr::include_graphics("ex7.png")
+```
+
+### Exercício 8
+> Utilizando o R faça um programa que realize de forma automática a detecção de bursts de atividade eletromiográfica. O sinal eletromiográfico deverá ser gerado de acordo com os seguintes critérios:
+  . frequência de amostragem = 1000 Hz
+  . duração da simulação = 10 segundos
+  . número total de bursts = 5
+  . duração de cada bust = 1 segundo 
+  . trechos de ruído amostrados a partir de uma distribuição normal
+Dica: utilize o valor RMS estimado a partir de janelas de 100 ms com sobreposição de 30%; defina um limiar e quando o valor RMS ultrapassá-lo, significa que o início de um burst está acontecendo; o término do burst pode ser detectado sempre que o valor RMS retornar ao nível inferior ao do limiar.
+
+```{R}
+library(dygraphs)
+library(tuneR)
+fs <- 1000 # frequência de amostragem
+dt <- 1/fs
+tf <- 10 #duração da simulação em segundos
+t <- seq(from =0, to = tf, by = dt)
+# Onda quadrada
+f1 <- 5 # total de bursts
+ondaquad <- square(f1, samp.rate = fs, duration = tf+dt, xunit = "time")@left
+# Sinal usado no burst
+s.burst <- noise(kind = "white", samp.rate = fs, duration = tf+dt, xunit = "time")@left
+# SInal ruído
+s.ruido <- rnorm(length(t))
+# trechos de ruído
+indice1 <- which(ondaquad == -1.0)
+signal_emg <- rep(NA, length(s.ruido))
+signal_emg[indice1] <- s.ruido[indice1]
+# Trecho com burst
+indice2 <- which(ondaquad > -1.0)
+signal_emg[indice2] <- s.burst[indice2]*25
+# Criando dataframe e plotando
+df_emg <- data.frame(time = t, sinal = signal_emg)
+dygraph(df_emg, main = "Sinal EMG Sintético", xlab = "Tempo (s)", ylab = "Amplitude (mV") %>%
+  dyRangeSelector()
+```
+
+```{R}
+# Função que realiza o janelamento com sobreposição
+splitWithOverlap <- function(y, seg.length, overlap) {
+  vec <- 1:length(y)
+  starts = seq(1, length(vec), by=seg.length-overlap)
+  ends = starts + seg.length - 1
+  ends[ends > length(vec)] = length(vec) # índice final não ultrapassará o tamanho do vetor
+
+  ly <- lapply(1:length(starts),
+               function(i)
+                 if( (ends[i]-starts[i]+1) == seg.length){
+                   y <- vec[starts[i]:ends[i]]
+                 }
+  )
+    ly[!sapply(ly, is.null)] #removendo elementos nulos da lista, retornando assim os elementos não nulos
+}
+# Parâmetros para janelamento do sinal
+Nwnd <- 100
+N <- (Nwnd / 1000) * fs
+wngSeg <- splitWithOverlap (signal_emg, seg.length = N, overlap = ceiling(N*0.3))
+# Determinando o valor RMS para cada janela
+tc <- rep(NA, length(wngSeg))
+v.rms <- rep(NA, length(wngSeg))
+for(i in 1:length(wngSeg)){
+  tc[i] <- mean(wngSeg[[i]])*dt
+  v.rms[i] <- sqrt(sum(signal_emg[wngSeg[[i]]] *signal_emg[wngSeg[[i]]]) / length(wngSeg
+                                                                                  [[i]]))
+}
+dygraph(data.frame(tc, v.rms), main = "Valor RMS no sinal EMG",
+        xlab = "Tempo médio (s)",
+        ylab = "Valor RMS") %>% dyRangeSelector()
+```
+
+```{R}
+# Dectectando os bursts com valores de RMS > 4
+limiarrms <- rep(NA, length(wngSeg))
+indice3 <- which(v.rms > 4)
+limiarrms[indice3] <- v.rms[indice3]
+dygraph(data.frame(tc, limiarrms), main = "Valores RMS acima do limiar",
+        xlab = "Tempo Médio (s)",
+        ylab = "Valor RMS") %>% dySeries("limiarrms", stemPlot = T)
+```
+

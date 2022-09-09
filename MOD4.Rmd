@@ -1,0 +1,202 @@
+---
+title: " LISTA DE EXERCÍCIOS 4 "
+author: " Mariana Soares Carneiro - 11811EBI012 "
+output: 
+  html_document:
+    highlight: tango
+    includes:
+      after_body: psbfix.html
+---
+
+# Módulo 4
+
+### Exercício 1
+> Faça uma coleta simultânea de dados eletromiográficos e inerciais. Você deverá seguir o seguinte protocolo experimental:  
+
+#### A. Posicionar os sensores de eletromiografia no músculo tibial anterior e nos músculos do tríceps sural.O acelerômetro deve ser posicionado nos dois terços proximais da parte lateral da perna, com o eixo y contra a gravidade.  
+#### B. Com o sujeito na posição ortostática deve-se realizar o movimento de dorsiflexão e flexão plantar. No retorno da flexão realizar um contato brusco do calcanhar com o solo.  
+#### C. Realizar 60 repetições da tarefa, sem descanso.  
+#### D. Salvar o arquivo de dados resultante com o nome “DadosM4-1.txt”.
+
+
+```r
+ O professor disponibilizou os dados que serão utilizados nesta lista através de um documento do tipo txt.
+``` 
+
+### Exercício 2
+
+> Faça a estimativa de parâmetros estatísticos dos sinais eletromiográficos disponíveis no arquivo “DadosM4-1.txt”. Os seguintes passos devem ser executados:  
+
+#### A. Faça a detecção dos picos no sinal AccY. Devem ser considerados picos aqueles valores que tenham amplitude de pelo menos 90% do valor do pico máximo do sinal.
+
+```{r}
+library(pracma)
+library(dygraphs)
+library(htmltools)
+
+df1 <- read.table("DadosM4-1.txt", header = FALSE, sep = " ", skip = 6)
+names(df1) <- c("AccX", "AccY", "MusTibial", "MuscTriceps")
+
+fs <- 500 # definindo a frequência
+dt <- 1/fs # definindo intervalo das amostras
+t <- seq(from = 0, to = dt*(length(df1$AccX) -1), by = dt) # definindo vetor tempo
+df1 <- cbind(time = t, df1) # inclusão do vetor tempo no dataframe
+
+limiar <- max(df1$AccY, na.rm = TRUE) * 0.9 # definindo o limiar de 90%
+pico <- findpeaks(df1$AccY, minpeakheight = limiar)
+indxpeaks <- pico[ , 2]
+df1$peaks <- NA # iniciando vetor com dados faltantes
+df1$peaks[indxpeaks] <- df1$AccY[indxpeaks]
+
+# Plotando o gráfico para visualizar os picos do sinal
+ dygraph(df1[c("time", "AccY", "peaks")], main = "Picos AccY", group = "E1") %>%
+    dyRangeSelector()
+
+```
+
+
+#### B. Gere um gráfico com os picos encontrados na letra a).
+
+```{r}
+dygraph(df1[c("time", "peaks")], main = "Picos encontrados", group = "E1") %>%
+  dySeries("peaks", stemPlot = TRUE) %>%
+    dyLimit(limiar, "Max", strokePattern = "solid", color = "black") %>%
+  dyRangeSelector()
+```
+
+#### C. Calcule as estatísticas abaixo para cada janela de sinal do músculo tibial anterior. O tamanho da janela deve ser de 500 ms, e o início da mesma deve ser a partir de cada um dos picos detectados na letra a). Média, Mediana, Moda, Amplitude, Variância, Coeficiente de Variação, Distância Interquartil
+
+```{r}
+
+library(dygraphs)
+library(pracma)
+library(htmltools)
+library(statip)
+
+df1 <- read.table("DadosM4-1.txt", header = FALSE, sep = " ", skip = 6)
+names(df1) <- c("AccX", "AccY", "MusTibial", "MuscTriceps")
+
+fs <- 500 # definindo a frequência
+dt <- 1/fs # definindo intervalo das amostras
+t <- seq(from = 0, to = dt*(length(df1$AccX) -1), by = dt) # definindo vetor tempo
+df1 <- cbind(time = t, df1) # inclusão do vetor tempo no dataframe
+
+limiar <- max(df1$AccY, na.rm = TRUE) * 0.9 # definindo o limiar de 90%
+pico <- findpeaks(df1$AccY, minpeakheight = limiar)
+indxpeaks <- pico[ , 2]
+df1$peaks <- NA # iniciando vetor com dados faltantes
+df1$peaks[indxpeaks] <- df1$AccY[indxpeaks]
+
+# Sinal de interesse
+y<- df1$MusTibial
+t<- df1$time
+
+# Tamanho da janela em numero de amostras
+
+Nwnd <- fs*(500/1000)
+
+# Parametros estatisticos
+vmedia <- NA
+vmediana <- NA
+vmoda <- NA
+vvar <- NA
+vdist <- NA
+vamp <- NA
+vcv <- NA
+vtime <- NA
+
+
+# Varrendo as posições do dataframe
+
+for(i in 1:length(indxpeaks)){
+  if (i < 3009)
+  {
+    Sinal <- y[(indxpeaks[i]:(indxpeaks[i]+Nwnd))]
+        time <- t[indxpeaks[i]]
+    vtime <- c(vtime, time)
+   
+    # calculando a média para cada janela
+    media <- mean(Sinal)
+    vmedia <- c(vmedia,media)
+   
+    # calculando a mediana para cada janela
+    mediana <- median(Sinal)
+    vmediana <- c(vmediana, mediana)
+   
+    # calculando a moda para cada janela
+    moda <- mfv(Sinal)
+    vmoda <- c(vmoda, moda)
+    
+    # calculando a  variância para cada janela
+    var <- var(Sinal)
+    vvar <- c(vvar, var)
+   
+    # calculando a amplitude para cada janela
+    amp <- sort(Sinal)
+    amp <- amp[length(amp)]-amp[1]
+    vamp <- c(vamp, amp)
+   
+    # calculando o coeficiente de variação para cada janela
+    cv <- 100*sd(Sinal, na.rm = T)/mean(Sinal)
+    vcv <- c(vcv, cv)
+    
+    # Rverificando o quantil para cada janela
+    vet <- data.frame(quantile(Sinal <- rnorm(1001), na.rm = T))
+    dist <- vet$quantile.Sinal.[3] - vet$quantile.Sinal.[1]
+    vdist <- c(vdist,dist)
+  }
+}
+
+vmedia <- data.frame(vmedia[-1])
+vmediana <- data.frame(vmediana [-1])
+vvar <- data.frame(vvar[-1])
+vamp <-data.frame(vamp[-1])
+vcv <- data.frame(vcv[-1])
+vdist <-data.frame(vdist[-1])
+vtime <- data.frame(vtime[-1])
+vmoda <- data.frame(vmoda[-1])
+
+print(vmedia) # valor média
+
+print(vmediana) # valor mediana
+
+print(vmoda) # valor moda
+
+print(vvar) # valor variância
+
+print(vamp) # valor amplitude
+
+print(vcv) # valor coeficiente de variação 
+
+print(vdist) # valor distância interquartil
+
+print(vtime) # vetor tempo
+
+```
+
+
+#### D. Faça um gráfico que descreva a variação da Mediana em função do tempo (dica: observe como o valor rms foi calculado em função do tempo, no tutorial)
+
+```{r}
+
+y <- df1$MuscTriceps # sinal de interesse
+
+Nwnd <- 500 # tamanho da janela
+
+indices <- seq(from=1, to=length(y), by=Nwnd) # índices iniciais e finais 
+str(indices)
+N <- length(indices)
+df3 <- data.frame(time=rep(NA,times=N-1))
+df3$mediana <- NA
+df3$time <- NA
+for(i in 1:(N-1))
+{
+  df3$time[i] <- (indices[i] + (indices[i+1]-indices[i])/2) * dt #tempo em segundos
+  df3$mediana[i] <- median(y[indices[i]])
+  df3$mediana[i]<- median(y[indices[i]:indices[i+1]])
+}
+dygraph(df3, main = "Mediana x Tempo", xlab = "Tempo", ylab = "Mediana") %>%
+  dyRangeSelector()
+
+```
+

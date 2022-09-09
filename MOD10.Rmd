@@ -1,0 +1,1060 @@
+---
+title: "Lista do Módulo 10"
+author: "Mariana Soares Carneiro - 11811EBI012"
+output: 
+  html_document:
+    highlight: tango
+    includes:
+      after_body: psbfix.html
+---
+
+# Módulo 10
+
+### Exercício 1
+> O arquivo “ColetaEEG-M10.rhd” - disponível na plataforma Moodle possui dados referentes a 16 canais de sinais EEG e um canal auxiliar (pulso) que foi utilizado para indicar a marcação de eventos durante a coleta dos dados. No total foram gerados 5 eventos (E1, E2, E3, E4 e E5). Os eventos registrados estão relacionados com os seguintes estados mentais do indivíduo:
+  . Mente focada, em uma determinada imagem internalizada, por exemplo o Sol, com os olhos abertos.
+  . Mente focada, em uma determinada imagem internalizada, por exemplo o Sol, com os olhos fechados.
+  . Realização mental de operações matemáticas:
+  
+```{R echo=FALSE}
+knitr::include_graphics("eqs1.png")
+```
+
+> a. Converta os arquivos dos sinais coletados em formato Excel. Para isto utilize a toolbox disponível em https://github.com/aoandrade/PDPack. As seguintes bibliotecas e programas exemplos devem ser empregadas:
+  . read_Intan_RHD2000_file.R
+  . ExampleOpenItantFile.R
+  . ExampleConvertIntanToExcel.R
+
+> b.  Plote cada um dos sinais coletados utilizando a função dygraph. Em cada um dos gráficos sombreie as regiões que indiquem o início e o fim das atividades (eventos) realizadas durante o protocolo experimental.
+  . A função dyShading deve ser utilizada para realizar o sombreamento.
+  . Todos os gráficos devem conter legendas dos eixos e título que identifique o sinal.
+  . O intervalo em que uma atividade (evento) ocorre é delimitado por dois pulsos consecutivos. – Considere o início e o final da atividade os instantes em que o pulso sai do nível alto e retorna ao nível baixo.
+  . No conjunto de dados em análise temos 10 pulsos, ou seja, cada par de pulso delimita o ínicio e o final de um evento.
+
+```r
+library(openxlsx) # carrega a biblioteca "openxlsx"
+library(dygraphs) # carrega a biblioteca "dygraphs"
+
+## a) conversão de rdh para xlsx:
+source("C:/Users/Mariana/Documents/PSB/R/read_Intan_RHD2000_file.R")
+filename <- file.choose() 
+ConvertRHD2Excel(filename) 
+
+## b) Plotagem dos gráficos
+df <- read.xlsx("C:/Users/Mariana/Documents/PSB/R//ColetaEEG-M10.xlsx")
+indx <- which(df$pulse == 1)
+dfplot <- data.frame(time = df$time, Sinal = df$chan.1)
+dygraph(dfplot, main = 'Canal 1', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal1.png")
+```
+
+```
+dfplot <- data.frame(time = df$time, Sinal = df$chan.2)
+dygraph(dfplot, main = 'Canal 2', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+
+```{R echo=FALSE}
+knitr::include_graphics("canal2.png")
+```
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.3)
+dygraph(dfplot, main = 'Canal 3', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal3.png")
+```
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.4)
+dygraph(dfplot, main = 'Canal 4', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal4.png")
+```
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.5)
+dygraph(dfplot, main = 'Canal 5', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal5.png")
+```
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.6)
+dygraph(dfplot, main = 'Canal 6', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal6.png")
+```
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.7)
+dygraph(dfplot, main = 'Canal 7', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal7.png")
+```
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.8)
+dygraph(dfplot, main = 'Canal 8', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal8.png")
+```
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.9)
+dygraph(dfplot, main = 'Canal 9', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal9.png")
+```
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.9)
+dygraph(dfplot, main = 'Canal 10', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal10.png")
+```
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.9)
+dygraph(dfplot, main = 'Canal 11', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal11.png")
+```
+
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.9)
+dygraph(dfplot, main = 'Canal 12', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal12.png")
+```
+
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.9)
+dygraph(dfplot, main = 'Canal 13', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal13.png")
+```
+
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.9)
+dygraph(dfplot, main = 'Canal 14', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal14.png")
+```
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.9)
+dygraph(dfplot, main = 'Canal 15', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal15.png")
+```
+
+```r
+dfplot <- data.frame(time = df$time, Sinal = df$chan.9)
+dygraph(dfplot, main = 'Canal 16', xlab = 'Tempo(s)', ylab = 'Tensão(V)' ) %>% dyShading(from
+ = 20, to=52, axis = 'x', color = "blue")%>% dyShading(from = 70, to=102, axis = 'x', color =
+"blue")%>% dyShading(from = 120, to=132, axis = 'x', color = "blue")%>% dyShading(from = 145,
+to=160, axis = 'x', color = "blue")%>% dyShading(from = 185, to=209, axis = 'x', color = "bl
+ue")
+```
+```{R echo=FALSE}
+knitr::include_graphics("canal16.png")
+```
+
+### Exercício 2
+> Faça a filtragem de todos os sinais EEG, por meio de um filtro Butterworth de ordem n=2, para a estimativa das ondas Delta, Teta, Alfa, Beta e Gama. Os passos abaixo devem ser considerados:
+  . Gere o gráfico do espectro de amplitude para cada um dos filtros criados deve ser plotado.
+  . Faça a filtragem dos sinais por meio do uso da função filtfilt.
+  . Utilize a biblioteca dygraphs e a função dyHighlight para visualizar e comparar o sinal original com o o filtrado.
+
+```r
+library(dygraphs) # carrega a biblioteca "dygraphs"
+library(signal) # carrega a biblioteca "signal"
+library(pracma) # carrega a biblioteca "pracma"
+###Espectro de Amplitude Canal 1
+funfft <- fft(df$chan.1)
+dft1 <- abs(funfft)
+N <- length(funfft)
+fs <- 1000 # frequência de amostragem em Hz
+k <- (0: (N - 1))
+fk= k*(N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+###Espectro de Amplitude Canal 1 - Delta
+funfft <- fft(delta_filt1)
+dftd1<- abs(funfft)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(fs/N)
+red <- length(fk)/2
+efcd <- data.frame(time = fk[1: (red+1)], y = dftd1[1: (red+1)])
+dfespd <- dygraph (data.frame(time = fk[1: (red+1)], y = dftd1[1: (red+1)]))
+### Espectro de Amplitude Canal 1 - theta
+funfft <- fft(theta_filt1)
+dft1<- abs(funfft)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(fs/N)
+red <- length(fk)/2
+efct <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfespt <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+### Espectro de Amplitude Canal 1 - alpha
+funfft <- fft(alpha_filt1)
+dft1<- abs(funfft)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(fs/N)
+red <- length(fk)/2
+efca <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfespa <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+###Espectro de Amplitude Canal 1 - Beta
+funfft <- fft(beta_filt1)
+dft1<- abs(funfft)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(fs/N)
+red <- length(fk)/2
+efcb <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfespb <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+###Espectro de Amplitude Canal 1 - Gama
+funfft <- fft(gama_filt1)
+dft1<- abs(funfft)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(fs/N)
+red <- length(fk)/2
+efcg <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfespg <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+###  Onda Delta 
+nd <- 2 # ordem do filtro
+Fs <- 1000 # frequência de amostragem em Hz
+Fc_ld <- 0.5 # frequência de corte inferior em Hz
+Fc_ud <- 4 # frequência de corte superior em Hz
+Wd <- c(Fc_ld, Fc_ud)/(Fs/2)
+bt <- butter(nd, Wd, type = "pass") # cálculo dos coeficientes do fitro
+freqz(filt = bt, Fs = Fs)
+dfplot <- data.frame(time=c(1:5), ch1 = bt$a , ch2 = bt$b)
+dygraph(dfplot)
+t <- df$time
+### Canal 1 Onda Delta
+delta_filt1 <- filtfilt(filt = bt, df$chan.1)
+dfplot <- data.frame(time =t, df$chan.1, yf = delta_filt1)
+dygraph(dfplot) %>% dyHighlight(highlightCircleSize = 5,highlightSeriesBackgroundAlpha = 0.2,
+hideOnMouseOut = FALSE)
+### Canal 2 Onda Delta
+delta_filt2 <- filtfilt(filt = bt, df$chan.2)
+dfplot <- data.frame(time = t, df$chan.2, yf = delta_filt2)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 3 Onda Delta
+delta_filt3 <- filtfilt(filt = bt, df$chan.3)
+dfplot <- data.frame(time = t, df$chan.3, yf = delta_filt3)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 4 Onda Delta
+delta_filt4<- filtfilt(filt = bt, df$chan.4)
+dfplot <- data.frame(time = t, df$chan.4, yf = delta_filt4)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 5 Onda Delta
+delta_filt5<- filtfilt(filt = bt, df$chan.5)
+dfplot <- data.frame(time = t, df$chan.5, yf = delta_filt5)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 6 Onda Delta
+delta_filt6<- filtfilt(filt = bt, df$chan.6)
+dfplot <- data.frame(time = t, df$chan.6, yf = delta_filt6)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 7 Onda Delta
+delta_filt7<- filtfilt(filt = bt, df$chan.7)
+dfplot <- data.frame(time = t, df$chan.7, yf = delta_filt7)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 8 Onda Delta
+delta_filt8<- filtfilt(filt = bt, df$chan.8)
+dfplot <- data.frame(time = t, df$chan.8, yf = delta_filt8)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 9 Onda Delta
+delta_filt9<- filtfilt(filt = bt, df$chan.9)
+dfplot <- data.frame(time = t, df$chan.9, yf = delta_filt9)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 10 Onda Delta
+delta_filt10 <- filtfilt(filt = bt, df$chan.10)
+dfplot <- data.frame(time = t, df$chan.10, yf = delta_filt10)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 11 Onda Delta
+delta_filt11 <- filtfilt(filt = bt, df$chan.11)
+dfplot <- data.frame(time = t, df$chan.11, yf = delta_filt11)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut =FALSE)
+###Canal 12 Onda Delta
+delta_filt12 <- filtfilt(filt = bt, df$chan.12)
+dfplot <- data.frame(time = t, df$chan.12, yf = delta_filt12)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 13 Onda Delta
+delta_filt13 <- filtfilt(filt = bt, df$chan.13)
+dfplot <- data.frame(time = t, df$chan.13, yf = delta_filt13)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 14 Onda Delta
+delta_filt14 <- filtfilt(filt = bt, df$chan.14)
+dfplot <- data.frame(time = t, df$chan.14, yf = delta_filt14)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 15 Onda Delta
+delta_filt15 <- filtfilt(filt = bt, df$chan.15)
+dfplot <- data.frame(time = t, df$chan.15, yf = delta_filt15)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 16 Onda Delta
+delta_filt16 <- filtfilt(filt = bt, df$chan.16)
+dfplot <- data.frame(time = t, df$chan.16, yf = delta_filt16)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Onda Theta 
+n <- 2 # ordem do filtro
+Fs <- 1000 # frequência de amostragem em Hz
+Fc_l <- 4 # frequência de corte inferior em Hz
+Fc_u <- 7 # frequência de corte superior em Hz
+W <- c(Fc_l, Fc_u)/(Fs/2)
+bt <- butter(n, W, type = "pass") # cálculo dos coeficientes do fitro
+freqz(filt = bt, Fs = Fs)
+### Canal 1 Onda Theta
+theta_filt1 <- filtfilt(filt = bt, df$chan.1)
+dfplot <- data.frame(time =t, df$chan.1, yf = theta_filt1)
+dygraph(dfplot)
+### Canal 2 Onda Theta
+theta_filt2 <- filtfilt(filt = bt, df$chan.2)
+dfplot <- data.frame(time =t, df$chan.2, yf = theta_filt2)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 3 Onda Theta
+theta_filt3 <- filtfilt(filt = bt, df$chan.3)
+dfplot <- data.frame(time =t, df$chan.3, yf = theta_filt3)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 4 Onda Theta
+theta_filt4<- filtfilt(filt = bt, df$chan.4)
+dfplot <- data.frame(time =t, df$chan.4, yf = theta_filt4)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 5 Onda Theta
+theta_filt5<- filtfilt(filt = bt, df$chan.5)
+dfplot <- data.frame(time =t, df$chan.5, yf = theta_filt5)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 6 Onda Theta
+theta_filt6<- filtfilt(filt = bt, df$chan.6)
+dfplot <- data.frame(time =t, df$chan.6, yf = theta_filt6)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 7 Onda Theta
+theta_filt7<- filtfilt(filt = bt, df$chan.7)
+dfplot <- data.frame(time =t, df$chan.7, yf = theta_filt7)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 8 Onda Theta
+theta_filt8<- filtfilt(filt = bt, df$chan.8)
+dfplot <- data.frame(time =t, df$chan.8, yf = theta_filt8)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 9 Onda Theta
+theta_filt9<- filtfilt(filt = bt, df$chan.9)
+dfplot <- data.frame(time =t, df$chan.9, yf = theta_filt9)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal10 Onda Theta
+theta_filt10 <- filtfilt(filt = bt, df$chan.10)
+dfplot <- data.frame(time =t, df$chan.10, yf = theta_filt10)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal11 Onda Theta
+theta_filt11 <- filtfilt(filt = bt, df$chan.11)
+dfplot <- data.frame(time =t, df$chan.11, yf = theta_filt11)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal12 Onda Theta
+theta_filt12 <- filtfilt(filt = bt, df$chan.12)
+dfplot <- data.frame(time =t, df$chan.12, yf = theta_filt12)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal13 Onda Theta
+theta_filt13 <- filtfilt(filt = bt, df$chan.13)
+dfplot <- data.frame(time =t, df$chan.13, yf = theta_filt13)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal14 Onda Theta
+theta_filt14 <- filtfilt(filt = bt, df$chan.14)
+dfplot <- data.frame(time =t, df$chan.14, yf = theta_filt14)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal15 Onda Theta
+theta_filt15 <- filtfilt(filt = bt, df$chan.15)
+dfplot <- data.frame(time =t, df$chan.15, yf = theta_filt15)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal16 Onda Theta
+theta_filt16 <- filtfilt(filt = bt, df$chan.16)
+dfplot <- data.frame(time =t, df$chan.16, yf = theta_filt16)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+###  Onda Alpha 
+n <- 4 # ordem do filtro
+Fs <- 1000 # frequência de amostragem em Hz
+Fc_l <- 7 # frequência de corte inferior em Hz
+Fc_u <- 13# frequência de corte superior em Hz
+W <- c(Fc_l, Fc_u)/(Fs/2)
+bt <- butter(n, W, type = "pass") # cálculo dos coeficientes do fitro
+freqz(filt = bt, Fs = Fs)
+### Canal 1 Onda Alpha
+alpha_filt1 <- filtfilt(filt = bt, df$chan.1)
+dfplot <- data.frame(time =t, df$chan.1, yf = alpha_filt1)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 2 Onda Alpha
+alpha_filt2 <- filtfilt(filt = bt, df$chan.2)
+dfplot <- data.frame(time =t, df$chan.2, yf = alpha_filt2)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 3 Onda Alpha
+alpha_filt3 <- filtfilt(filt = bt, df$chan.3)
+dfplot <- data.frame(time =t, df$chan.3, yf = alpha_filt3)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 4 Onda Alpha
+alpha_filt4<- filtfilt(filt = bt, df$chan.4)
+dfplot <- data.frame(time =t, df$chan.4, yf = alpha_filt4)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 5 Onda Alpha
+alpha_filt5<- filtfilt(filt = bt, df$chan.5)
+dfplot <- data.frame(time =t, df$chan.5, yf = alpha_filt5)
+dygraph(dfplot)%>%
+dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 6 Onda Alpha
+alpha_filt6<- filtfilt(filt = bt, df$chan.6)
+dfplot <- data.frame(time =t, df$chan.6, yf = alpha_filt6)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 7 Onda Alpha
+alpha_filt7<- filtfilt(filt = bt, df$chan.7)
+dfplot <- data.frame(time =t, df$chan.7, yf = alpha_filt7)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 8 Onda Alpha
+alpha_filt8<- filtfilt(filt = bt, df$chan.8)
+dfplot <- data.frame(time =t, df$chan.8, yf = alpha_filt8)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 9 Onda Alpha
+alpha_filt9<- filtfilt(filt = bt, df$chan.9)
+dfplot <- data.frame(time =t, df$chan.9, yf = alpha_filt9)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 10 Onda Alpha
+alpha_filt10 <- filtfilt(filt = bt, df$chan.10)
+dfplot <- data.frame(time =t, df$chan.10, yf = alpha_filt10)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 11 Onda Alpha
+alpha_filt11 <- filtfilt(filt = bt, df$chan.11)
+dfplot <- data.frame(time =t, df$chan.11, yf = alpha_filt11)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 12 Onda Alpha
+alpha_filt12 <- filtfilt(filt = bt, df$chan.12)
+dfplot <- data.frame(time =t, df$chan.12, yf = alpha_filt12)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 13 Onda Alpha
+alpha_filt13 <- filtfilt(filt = bt, df$chan.13)
+dfplot <- data.frame(time =t, df$chan.13, yf = alpha_filt13)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 14 Onda Alpha
+alpha_filt14 <- filtfilt(filt = bt, df$chan.14)
+dfplot <- data.frame(time =t, df$chan.14, yf = alpha_filt14)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 15 Onda Alpha
+alpha_filt15 <- filtfilt(filt = bt, df$chan.15)
+dfplot <- data.frame(time =t, df$chan.15, yf = alpha_filt15)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 16 Onda Alpha
+alpha_filt16 <- filtfilt(filt = bt, df$chan.16)
+dfplot <- data.frame(time =t, df$chan.16, yf = alpha_filt16)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+###  Onda Beta 
+n <- 2 # ordem do filtro
+Fs <- 1000 # frequência de amostragem em Hz
+Fc_l <- 13 # frequência de corte inferior em Hz
+Fc_u <- 30 # frequência de corte superior em Hz
+W <- c(Fc_l, Fc_u)/(Fs/2)
+bt <- butter(n, W, type = "pass") # cálculo dos coeficientes do fitro
+freqz(filt = bt, Fs = Fs)
+### Canal 1 Onda Beta
+beta_filt1 <- filtfilt(filt = bt, df$chan.1)
+dfplot <- data.frame(time =t, df$chan.1, yf = beta_filt1)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 2 Onda Beta
+beta_filt2 <- filtfilt(filt = bt, df$chan.2)
+dfplot <- data.frame(time =t, df$chan.2, yf = beta_filt2)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 3 Onda Beta
+beta_filt3 <- filtfilt(filt = bt, df$chan.3)
+dfplot <- data.frame(time =t, df$chan.3, yf = beta_filt3)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 4 Onda Beta
+beta_filt4<- filtfilt(filt = bt, df$chan.4)
+dfplot <- data.frame(time =t, df$chan.4, yf = beta_filt4)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 5 Onda Beta
+beta_filt5<- filtfilt(filt = bt, df$chan.5)
+dfplot <- data.frame(time =t, df$chan.5, yf = beta_filt5)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 6 Onda Beta
+beta_filt6<- filtfilt(filt = bt, df$chan.6)
+dfplot <- data.frame(time =t, df$chan.6, yf = beta_filt6)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 7 Onda Beta
+beta_filt7<- filtfilt(filt = bt, df$chan.7)
+dfplot <- data.frame(time =t, df$chan.7, yf = beta_filt7)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 8 Onda Beta
+beta_filt8<- filtfilt(filt = bt, df$chan.8)
+dfplot <- data.frame(time =t, df$chan.8, yf = beta_filt8)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+###Canal 9 Onda Beta
+beta_filt9<- filtfilt(filt = bt, df$chan.9)
+dfplot <- data.frame(time =t, df$chan.9, yf = beta_filt9)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 10 Onda Beta
+beta_filt10 <- filtfilt(filt = bt, df$chan.10)
+dfplot <- data.frame(time =t, df$chan.10, yf = beta_filt10)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 11 Onda Beta
+beta_filt11 <- filtfilt(filt = bt, df$chan.11)
+dfplot <- data.frame(time =t, df$chan.11, yf = beta_filt11)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 12 Onda Beta
+beta_filt12 <- filtfilt(filt = bt, df$chan.12)
+dfplot <- data.frame(time =t, df$chan.12, yf = beta_filt12)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 13 Onda Beta
+beta_filt13 <- filtfilt(filt = bt, df$chan.13)
+dfplot <- data.frame(time =t, df$chan.13, yf = beta_filt13)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut =
+FALSE)
+### Canal 14 Onda Beta
+beta_filt14 <- filtfilt(filt = bt, df$chan.14)
+dfplot <- data.frame(time =t, df$chan.14, yf = beta_filt14)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 15 Onda Beta
+beta_filt15 <- filtfilt(filt = bt, df$chan.15)
+dfplot <- data.frame(time =t, df$chan.15, yf = beta_filt15)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 16 Onda Beta
+beta_filt16 <- filtfilt(filt = bt, df$chan.16)
+dfplot <- data.frame(time =t, df$chan.16, yf = beta_filt16)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+###  Onda Gama 
+n <- 5 # ordem do filtro
+Fs <- 1000 # frequência de amostragem em Hz
+Fc_l <- 30 # frequência de corte inferior em Hz
+Fc_u <- 70 # frequência de corte superior em Hz
+W <- c(Fc_l, Fc_u)/(Fs/2)
+bt <- butter(n, W, type = "pass") # cálculo dos coeficientes do fitro
+### Canal 1 Onda Gama
+gama_filt1 <- filtfilt(filt = bt, df$chan.1)
+dfplot <- data.frame(time =t, df$chan.1, yf = gama_filt1)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 2 Onda Gama
+gama_filt2 <- filtfilt(filt = bt, df$chan.2)
+dfplot <- data.frame(time =t, df$chan.2, yf = gama_filt2)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 3 Onda Gama
+gama_filt3 <- filtfilt(filt = bt, df$chan.3)
+dfplot <- data.frame(time =t, df$chan.3, yf = gama_filt3)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 4 Onda Gama
+gama_filt4<- filtfilt(filt = bt, df$chan.4)
+dfplot <- data.frame(time =t, df$chan.4, yf = gama_filt4)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 5 Onda Gama
+gama_filt5<- filtfilt(filt = bt, df$chan.5)
+dfplot <- data.frame(time =t, df$chan.5, yf = gama_filt5)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 6 Onda Gama
+gama_filt6<- filtfilt(filt = bt, df$chan.6)
+dfplot <- data.frame(time =t, df$chan.6, yf = gama_filt6)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 7 Onda Gama
+gama_filt7<- filtfilt(filt = bt, df$chan.7)
+dfplot <- data.frame(time =t, df$chan.7, yf = gama_filt7)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 8 Onda Gama
+gama_filt8<- filtfilt(filt = bt, df$chan.8)
+dfplot <- data.frame(time =t, df$chan.8, yf = gama_filt8)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 9 Onda Gama
+gama_filt9<- filtfilt(filt = bt, df$chan.9)
+dfplot <- data.frame(time =t, df$chan.9, yf = gama_filt9)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 10 Onda Gama
+gama_filt10 <- filtfilt(filt = bt, df$chan.10)
+dfplot <- data.frame(time =t, df$chan.10, yf = gama_filt10)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 11 Onda Gama
+gama_filt11 <- filtfilt(filt = bt, df$chan.11)
+dfplot <- data.frame(time =t, df$chan.11, yf = gama_filt11)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 12 Onda Gama
+gama_filt12 <- filtfilt(filt = bt, df$chan.12)
+dfplot <- data.frame(time =t, df$chan.12, yf = gama_filt12)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 13 Onda Gama
+gama_filt13 <- filtfilt(filt = bt, df$chan.13)
+dfplot <- data.frame(time =t, df$chan.13, yf = gama_filt13)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 14 Onda Gama
+gama_filt14 <- filtfilt(filt = bt, df$chan.14)
+dfplot <- data.frame(time =t, df$chan.14, yf = gama_filt14)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 15 Onda Gama
+gama_filt15 <- filtfilt(filt = bt, df$chan.15)
+dfplot <- data.frame(time =t, df$chan.15, yf = gama_filt15)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+### Canal 16 Onda Gama
+gama_filt16 <- filtfilt(filt = bt, df$chan.16)
+dfplot <- data.frame(time =t, df$chan.16, yf = gama_filt16)
+dygraph(dfplot)%>%
+ dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)
+```
+
+### Exercício 3
+> Faça um gráfico que ilustre a relação entre os eventos (no eixo x) e o valor de frequência médio (Hz) para o pico do espectro de amplitude dos 16 canais de EEG disponíveis. Neste gráfico deverão ser geradas as curvas para cada uma das ondas de sinais EEG. A figura abaixo mostra a forma como o gráfico deve ser apresentado. Os valores e tendências no gráfico são meramente ilustrativos. A sequência de passos abaixo deve ser considerada:
+  a. Todos os sinais (os 16 canais de EEG) deverão ser filtrados por cada um dos filtros utilizados na questão 2.
+  b. O espectro de amplitude deve ser estimado por meio da transformada de Fourier. O valor de amplitude deve ser expresso em dB e o valor de frequência em Hz.
+  c. O espectro de amplitude deve ser estimado exclusivamente para os trechos dos sinais delimitados pelo intervalo de tempo de evento.
+  d. O pico (valor máximo) da amplitude do espectro deve ser encontrado, e o respectivo valor de frequência (Hz) deve ser armazenado.
+  e. Deve-se organizar as estimativas (do item d) de tal forma que seja possível calcular o valor médio dos valores do pico de todos os canais de EEG.
+  f. As informações deverão ser organizadas de modo a possibilitar a geração de um gráfico tal como o ilustrado abaixo.
+  
+```{R echo=FALSE}
+knitr::include_graphics("eventoilustrativo.png")
+```
+
+```r
+library(signal) # carrega a biblioteca "signal"
+library(pracma) # carrega a biblioteca "pracma"
+### 3.a
+## Os 16 sinais passados por cada um dos filtros foram foram gerados anteriormente
+### 3.b
+n <- 2 # ordem do filtro
+Fs <- 1000 # frequência de amostragem em Hz
+Fc_l <- 1 # frequência de corte inferior em Hz
+Fc_u <- 42 # frequência de corte superior em Hz
+indx <- which((df$time>=20 & df$time <=52) |
+ (df$time>=70 & df$time <=102) |
+ (df$time>=120 & df$time <=132) |
+ (df$time>=145 & df$time <=160) |
+ (df$time>=185 & df$time <=209))
+W <- c(Fc_l, Fc_u)/(Fs/2)
+bt <- butter(n, W, type = "pass") # cálculo dos coeficientes do fitro
+#### Canal 1
+d_filt1 <- filtfilt(filt = bt, df$chan.1[indx])
+funfft <- fft(d_filt1)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch1 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 2
+d_filt <- filtfilt(filt = bt, df$chan.2[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch2 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 3
+d_filt <- filtfilt(filt = bt, df$chan.3[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch3 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 4
+d_filt <- filtfilt(filt = bt, df$chan.4[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch4 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 5
+d_filt <- filtfilt(filt = bt, df$chan.5[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch5 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 6
+d_filt <- filtfilt(filt = bt, df$chan.6[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch6 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 7
+d_filt <- filtfilt(filt = bt, df$chan.7[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch7 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 8
+d_filt <- filtfilt(filt = bt, df$chan.8[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch8 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 9
+d_filt <- filtfilt(filt = bt, df$chan.9[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch9 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 10
+d_filt <- filtfilt(filt = bt, df$chan.10[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch10 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 11
+d_filt <- filtfilt(filt = bt, df$chan.11[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch11 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 12
+d_filt <- filtfilt(filt = bt, df$chan.12[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch12 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 13
+d_filt <- filtfilt(filt = bt, df$chan.13[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch13 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 14
+d_filt <- filtfilt(filt = bt, df$chan.14[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch14 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 15
+d_filt <- filtfilt(filt = bt, df$chan.15[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch15 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+#### Canal 16
+d_filt <- filtfilt(filt = bt, df$chan.16[indx])
+funfft <- fft(d_filt)
+dft1<- abs(funfft)
+dft1 <- 20 * log10(dft1)
+picos_ch16 <- findpeaks(dft1, minpeakheight = 60, minpeakdistance = 2000)
+N <- length(funfft)
+k <- (0: (N - 1))
+fk <- k*(Fs/N)
+red <- length(fk)/2
+efc <- data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)])
+dfesp <- dygraph (data.frame(time = fk[1: (red+1)], y = dft1[1: (red+1)]))
+### 3.d
+freqzc1 <- sort(fk[picos_ch1[,2]])
+freqzc2 <- sort(fk[picos_ch2[,2]])
+freqzc3 <- sort(fk[picos_ch3[,2]])
+freqzc4 <- sort(fk[picos_ch4[,2]])
+freqzc5 <- sort(fk[picos_ch5[,2]])
+freqzc6 <- sort(fk[picos_ch6[,2]])
+freqzc7 <- sort(fk[picos_ch7[,2]])
+freqzc8 <- sort(fk[picos_ch8[,2]])
+freqzc9 <- sort(fk[picos_ch9[,2]])
+freqzc10 <- sort(fk[picos_ch10[,2]])
+freqzc11 <- sort(fk[picos_ch11[,2]])
+freqzc12 <- sort(fk[picos_ch12[,2]])
+freqzc13 <- sort(fk[picos_ch13[,2]])
+freqzc14 <- sort(fk[picos_ch14[,2]])
+freqzc15 <- sort(fk[picos_ch15[,2]])
+freqzc16 <- sort(fk[picos_ch16[,2]])
+### 3.e
+organiza1 <- sort(picos_ch1)
+vmed1 <- c((picos_ch1)/(sqrt(2)))
+sort(vmed1)
+organiza2 <- sort(picos_ch2)
+vmed2 <- c((picos_ch2)/(sqrt(2)))
+sort(vmed2)
+organiza3 <- sort(picos_ch3)
+vmed3 <- c((picos_ch3)/(sqrt(2)))
+sort(vmed3)
+organiza4 <- sort(picos_ch4)
+vmed4 <- c((picos_ch4)/(sqrt(2)))
+sort(vmed4)
+organiza5 <- sort(picos_ch5)
+vmed5 <- c((picos_ch5)/(sqrt(2)))
+sort(vmed5)
+organiza6 <- sort(picos_ch6)
+vmed6 <- c((picos_ch6)/(sqrt(2)))
+sort(vmed6)
+organiza7 <- sort(picos_ch7)
+vmed7 <- c((picos_ch7)/(sqrt(2)))
+sort(vmed7)
+organiza8 <- sort(picos_ch8)
+vmed8 <- c((picos_ch8)/(sqrt(2)))
+sort(vmed8)
+organiza9 <- sort(picos_ch9)
+vmed9 <- c((picos_ch9)/(sqrt(2)))
+sort(vmed9)
+organiza10 <- sort(picos_ch10)
+vmed10 <- c((picos_ch10)/(sqrt(2)))
+sort(vmed10)
+organiza11 <- sort(picos_ch11)
+vmed11 <- c((picos_ch11)/(sqrt(2)))
+sort(vmed11)
+organiza12 <- sort(picos_ch12)
+vmed12 <- c((picos_ch12)/(sqrt(2)))
+sort(vmed12)
+organiza13 <- sort(picos_ch13)
+vmed13 <- c((picos_ch13)/(sqrt(2)))
+sort(vmed13)
+organiza14 <- sort(picos_ch14)
+vmed14 <- c((picos_ch14)/(sqrt(2)))
+sort(vmed14)
+organiza15 <- sort(picos_ch15)
+vmed15 <- c((picos_ch15)/(sqrt(2)))
+sort(vmed15)
+organiza16 <- sort(picos_ch16)
+vmed16 <- c((picos_ch16)/(sqrt(2)))
+sort(vmed16)
+### 3. f
+library(ggplot2)
+## Determinando frequência de cada onda
+f_Alpha <- dfplot$Alpha
+f_Beta <- dfplot$Beta
+f_Gama <- dfplot$Gama
+f_Delta <- dfplot$Delta
+f_Theta <- dfplot$Theta
+df_grafico <- data.frame(
+graf = factor(rep(c("Alpha","Beta","Gama","Delta","Theta"))),
+evento = factor(rep(c("E1","E2","E3","E4","E5"))),
+f_dfplot = c(f_Alpha,f_Beta,f_Gama,f_Delta,f_Theta)
+)
+## Gerando o gráfico
+ggplot(df_grafico, aes(x = evento, y = f_dfplot, color = graf)) +
+geom_point(aes(shape = graf)) +
+geom_path(aes(group = graf)) +
+labs(title = "",
+x = "Evento",
+y = "Frequência Média do Pico do Espectro de Amplitude (Hz)",
+color = "Onda",
+shape = "Onda") +
+theme_bw()
+```

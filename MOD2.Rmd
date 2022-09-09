@@ -1,0 +1,664 @@
+---
+title: "Lista do Módulo 2"
+author: "Mariana Soares Carneiro"
+output: 
+  html_document:
+    highlight: tango
+    includes:
+      after_body: psbfix.html
+---
+
+# Módulo 2
+
+### Exercício 1
+> Gere sinais sintéticos que simulem a forma de onda do ciclo respiratório, de acordo a faixa etária:
+
+.Do nascimento a 6 semanas: 30 a 40 respirações por minuto;
+
+.6 meses: 25 a 40 respirações por minuto;
+
+.3 anos: 20 a 30 respirações por minuto;
+
+.6 anos: 18 a 25 respirações por minuto;
+
+.10 anos: 17 a 23 respirações por minuto;
+
+.Adultos: 12 a 18 respirações por minuto;
+
+.Idosos (≥ 65 anos): 12 a 28 respirações por minuto;
+
+.Idosos (≥ 80 anos): 10 a 30 respirações por minuto.
+
+```{R}
+tf <- 60 #duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+
+# do nascimento a 6 semanas
+f1 <- 40
+y1 <- sin(2*pi*t*f1)
+tWindow <- c (15, 16) #janela de tempo para visualização de dados
+df1 <- data.frame(time = t, y1)
+
+# 6 meses
+f2 <- 40
+y2 <- sin(2*pi*t*f2)
+tWindow <- c (15, 16) #janela de tempo para visualização de dados
+df2 <- data.frame(time = t, y2)
+
+# 3 anos
+f3 <- 30
+y3 <- sin(2*pi*t*f3)
+tWindow <- c (15, 16) #janela de tempo para visualização de dados
+df3 <- data.frame(time = t, y3)
+
+# 6 anos
+f4 <- 25
+y4 <- sin(2*pi*t*f4)
+tWindow <- c (15, 16) #janela de tempo para visualização de dados
+df4 <- data.frame(time = t, y4)
+
+# 10 anos
+f5 <- 23
+y5 <- sin(2*pi*t*f5)
+tWindow <- c (15, 16) #janela de tempo para visualização de dados
+df5 <- data.frame(time = t, y5)
+
+# adulto
+f6 <- 18
+y6 <- sin(2*pi*t*f6)
+tWindow <- c (15, 16) #janela de tempo para visualização de dados
+df6 <- data.frame(time = t, y6)
+
+# idoso (>=65 anos)
+f7 <- 28
+y7 <- sin(2*pi*t*f6)
+tWindow <- c (15, 16) #janela de tempo para visualização de dados
+df7 <- data.frame(time = t, y7)
+
+# idoso (>=80 anos)
+f8 <- 30
+y8 <- sin(2*pi*t*f6)
+tWindow <- c (15, 16) #janela de tempo para visualização de dados
+df7 <- data.frame(time = t, y8)
+```
+
+
+
+### Exercício 2
+> Utilize a bliblioteca dygraph para plotar um gráfico para cada um dos sinais simulados na questão 1. Adicione legendas para os eixos x e y de cada gráfico.
+
+
+```{R}
+#0 a 6 semanas
+library(dygraphs)
+tf <- 60 #duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+tWindow <- c(15, 16)
+f1 <- mean(30, 40) #frequência respiratória até 6 semanas
+df1 <- data.frame(time=t, y1) 
+dygraph(df1, main = "Fequência da Respiração de um recém nascido do nascimento a 6 semanas",  xlab = "Tempo (s)", ylab = "Frequência Respiratória") %>% dyRangeSelector(dateWindow = tWindow)
+
+```
+
+```{R}
+#6 meses
+library(dygraphs)
+tf <- 60 #duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+tWindow <- c(15, 16)
+f2 <- mean(25, 40) #frequência respiratória 6 meses
+df2 <- data.frame(time=t, y2) 
+dygraph(df2, main = "Fequência da Respiração de um bebê de 6 meses",  xlab = "Tempo (s)", ylab = "Frequência Respiratória") %>% dyRangeSelector(dateWindow = tWindow)
+```
+
+```{R}
+#3 anos 
+library(dygraphs)
+tf <- 60 #duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+tWindow <- c(15, 16)
+f3 <- mean(20, 30) #frequência respiratória 3 anos
+df3 <- data.frame(time=t, y3) 
+dygraph(df3, main = "Fequência da Respiração de uma criança de 3 anos",  xlab = "Tempo (s)", ylab = "Frequência Respiratória") %>% dyRangeSelector(dateWindow = tWindow)
+```
+
+```{R}
+#6 anos 
+library(dygraphs)
+tf <- 60 #duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+tWindow <- c(15, 16)
+f4 <- mean(18, 25) #frequência respiratória 6 anos
+df4 <- data.frame(time=t, y4) 
+dygraph(df4, main = "Fequência da Respiração de uma criança de 6 anos",  xlab = "Tempo (s)", ylab = "Frequência Respiratória") %>% dyRangeSelector(dateWindow = tWindow)
+```
+
+```{R}
+#10 anos 
+library(dygraphs)
+tf <- 60 #duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+tWindow <- c(15, 16)
+f5 <- mean(17, 23) #frequência respiratória 10 anos
+df5 <- data.frame(time=t, y5) 
+dygraph(df5, main = "Fequência da Respiração de uma criança de 10 anos",  xlab = "Tempo (s)", ylab = "Frequência Respiratória") %>% dyRangeSelector(dateWindow = tWindow)
+```
+
+```{R}
+#adulto 
+library(dygraphs)
+tf <- 60 #duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+tWindow <- c(15, 16)
+f6 <- mean(12, 18) #frequência respiratória adulto
+df6 <- data.frame(time=t, y6) 
+dygraph(df6, main = "Fequência da Respiração de um adulto",  xlab = "Tempo (s)", ylab = "Frequência Respiratória") %>% dyRangeSelector(dateWindow = tWindow)
+```
+
+```{R}
+#idoso (>= 65 anos)  
+library(dygraphs)
+tf <- 60 #duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+tWindow <- c(15, 16)
+f7 <- mean(12, 28) #frequência respiratória idoso (>=65 anos)
+df7 <- data.frame(time=t, y7) 
+dygraph(df7, main = "Fequência da Respiração de um idoso (≥ 65 anos)",  xlab = "Tempo (s)", ylab = "Frequência Respiratória") %>% dyRangeSelector(dateWindow = tWindow)
+```
+```{R}
+#idoso (>= 80 anos)  
+library(dygraphs)
+tf <- 60 #duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+tWindow <- c(15, 16)
+f8 <- mean(10, 30) #frequência respiratória idoso (>=80 anos)
+df8 <- data.frame(time=t, y8) 
+dygraph(df8, main = "Fequência da Respiração de um idoso (≥ 80 anos)",  xlab = "Tempo (s)", ylab = "Frequência Respiratória") %>% dyRangeSelector(dateWindow = tWindow)
+```
+
+### Exercício 3
+> Utilize a função ggplot para plotar um gráfico para cada um dos sinais simulados na questão 1. Adicione legendas para os eixos x e y de cada gráfico.
+
+```{R}
+library(ggplot2)
+tf <- 60 # duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+tWindow <- c(15, 16)
+
+# do nascimento a 6 semanas
+f1 <- mean(30, 40) #frequência respiratória do nascimento a 6 semanas
+y1 <- sin(2*pi*t*f1)
+df1 <- data.frame(time=t, y1)
+ggplot(data = df1, aes(x= df1$time, y= df1$y1)) + scale_x_continuous( limits = c(15,15.2)) + geom_point() + geom_line() + labs( x = "Tempo(s)", y = "Frequência Respiratória") 
+```
+
+```{R}
+
+# 6 meses
+f2 <- mean(25, 40) #frequência respiratória 6 meses
+y2 <- sin(2*pi*t*f2)
+df2 <- data.frame(time=t, y2)
+ggplot(data = df2, aes(x= df2$time, y= df2$y2)) + scale_x_continuous( limits = c(15,15.2)) + geom_point() + geom_line() + labs( x = "Tempo(s)", y = "Frequência Respiratória") 
+```
+
+```{R}
+
+# 3 anos
+f3 <- mean(20, 30) #frequência respiratória 3 anos
+y3 <- sin(2*pi*t*f3)
+df3 <- data.frame(time=t, y3)
+ggplot(data = df3, aes(x= df3$time, y= df3$y3)) + scale_x_continuous( limits = c(15,15.2)) + geom_point() + geom_line() + labs( x = "Tempo(s)", y = "Frequência Respiratória") 
+```
+
+```{R}
+
+# 6 anos
+f4 <- mean(18, 25) #frequência respiratória 6 anos
+y4 <- sin(2*pi*t*f4)
+df4 <- data.frame(time=t, y4)
+ggplot(data = df4, aes(x= df4$time, y= df4$y4)) + scale_x_continuous( limits = c(15,15.2)) + geom_point() + geom_line() + labs( x = "Tempo(s)", y = "Frequência Respiratória") 
+```
+
+```{R}
+
+# 10 anos
+f5 <- mean(17, 23) #frequência respiratória 10 anos
+y5 <- sin(2*pi*t*f5)
+df5 <- data.frame(time=t, y5)
+ggplot(data = df5, aes(x= df5$time, y= df5$y5)) + scale_x_continuous( limits = c(15,15.2)) + geom_point() + geom_line() + labs( x = "Tempo(s)", y = "Frequência Respiratória") 
+```
+
+```{R}
+
+# adulto
+f6 <- mean(12, 18) #frequência respiratória adulto
+y6 <- sin(2*pi*t*f6)
+df6 <- data.frame(time=t, y6)
+ggplot(data = df6, aes(x= df6$time, y= df6$y6)) + scale_x_continuous( limits = c(15,15.2)) + geom_point() + geom_line() + labs( x = "Tempo(s)", y = "Frequência Respiratória") 
+```
+
+```{R}
+
+#idoso (>= 65 anos) 
+f7 <- mean(12, 28) #frequência respiratória idoso (>= 65 anos) 
+y7 <- sin(2*pi*t*f7)
+df7 <- data.frame(time=t, y7)
+ggplot(data = df7, aes(x= df7$time, y= df7$y7)) + scale_x_continuous( limits = c(15,15.2)) + geom_point() + geom_line() + labs( x = "Tempo(s)", y = "Frequência Respiratória") 
+```
+
+```{R}
+
+#idoso (>= 80 anos) 
+f8 <- mean(10, 30) #frequência respiratória idoso (>= 80 anos) 
+y8 <- sin(2*pi*t*f8)
+df8 <- data.frame(time=t, y8)
+ggplot(data = df8, aes(x= df8$time, y= df8$y8)) + scale_x_continuous( limits = c(15,15.2)) + geom_point() + geom_line() + labs( x = "Tempo(s)", y = "Frequência Respiratória") 
+```
+
+### Exercício 4
+> Escolha um sinal simulado na questão 1, e plote-o utilizando a função dyStemSeries. Por que há um intervalo temporal entre cada amostra?
+
+```{R}
+library(dygraphs)
+tf <- 60 #duração do sinal em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+t <- seq(from = 0, to = tf, by = dt)
+
+# adulto
+f6 <- 18
+y6 <- sin(2*pi*t*f6)
+tWindow <- c (15, 15.1) #janela de tempo para visualização de dados
+df6 <- data.frame(time = t, y6)
+
+dygraph(df6, xlab = "Tempo (s)", ylab = "Frequência respiratória", main = "Ciclo respiratório do adulto") %>% dyStemSeries('y6') %>%dyRangeSelector(dateWindow = tWindow)
+```
+O intervalo temporal entre cada amostra acontece por causa do ciclo respiratório - inspiração e expiração do ar.
+
+### Exercício 5
+> Explique a estrutura básica de um arquivo EDF (https://www.edfplus.info/specs/edf.html).
+
+A especificação (texto azul foi adicionado após a publicação original)
+Um arquivo de dados contém uma gravação poligráfica digitalizada ininterrupta. Um arquivo de dados consiste em um registro de cabeçalho seguido por registros de dados. O registro de cabeçalho de comprimento variável identifica o paciente e especifica as características técnicas dos sinais registrados. Os registros de dados contêm épocas consecutivas de duração fixa da gravação poligráfica.
+
+Os primeiros 256 bytes do registro de cabeçalho especificam o número da versão deste formato, identificação local do paciente e do registro, informações de tempo sobre o registro, o número de registros de dados e, finalmente, o número de sinais (ns) em cada registro de dados. Então, para cada sinal, outros 256 bytes seguem no registro de cabeçalho, cada um especificando o tipo de sinal (por exemplo, EEG, temperatura corporal, etc.), calibração de amplitude e o número de amostras em cada registro de dados (a partir do qual a frequência de amostragem pode ser derivada uma vez que a duração de um registro de dados também é conhecida). Desta forma, o formato permite diferentes ganhos e frequências de amostragem para cada sinal. O registro de cabeçalho contém 256 + (ns * 256) bytes. A Figura 1 mostra seu formato detalhado.
+
+As informações nas strings ASCII devem ser justificadas à esquerda e preenchidas com espaços. O horário da meia-noite é 00:00:00. Recomenda-se que a duração de cada registro de dados seja um número inteiro de segundos e seu tamanho (número de bytes) não deve exceder 61440. Somente se um registro de dados de 1s exceder esse limite de tamanho, recomenda-se que a duração seja menor que 1s (por exemplo, 0,01).
+
+O mínimo e o máximo digitais de cada sinal devem especificar os valores extremos que podem ocorrer nos registros de dados. Estes são frequentemente os valores de saída extremos do conversor A/D. O mínimo e o máximo físicos (geralmente também fisiológicos) desse sinal devem corresponder a esses extremos digitais e ser expressos na dimensão física também especificada do sinal. Esses 4 valores extremos especificam o deslocamento e a amplificação do sinal.
+
+Após o registro de cabeçalho, cada um dos registros de dados subsequentes contém segundos de 'duração' de sinais 'ns', com cada sinal sendo representado pelo número especificado (no cabeçalho) de amostras. Para reduzir o tamanho dos dados e se adaptar ao software comumente usado para aquisição, processamento e exibição gráfica de sinais poligráficos, cada valor de amostra é representado como um inteiro de 2 bytes em formato de complemento de 2. A Figura 1 mostra o formato detalhado de cada registro de dados.
+
+Ganhos, montagens de eletrodos e filtros devem permanecer fixos durante a gravação. É claro que tudo isso pode ser modificado digitalmente durante a reprodução da gravação digitalizada.
+Abaixo está o formato digital detalhado do registro de cabeçalho (bloco superior, somente ASCII) e de cada registro de dados subsequente (bloco inferior, somente inteiros). Observe que cada um dos sinais ns é caracterizado separadamente no cabeçalho.
+
+HEADER RECORD (sugerimos adotar também as 12 especificações adicionais EDF+ simples )
+8 ascii : versão deste formato de dados (0)
+80 ascii : identificação local do paciente (lembre-se do item 3 das especificações EDF+ adicionais )
+80 ascii : identificação do registro local (mente item 4 das especificações adicionais do EDF+ )
+8 ascii: data de início da gravação (dd.mm.aa) (lembre-se do item 2 das especificações adicionais do EDF+ )
+8 ascii: hora de início da gravação (hh.mm.ss)
+8 ascii: número de bytes no registro de cabeçalho
+44 ascii : reservado
+8 ascii : número de registros de dados (-1 se desconhecido , obedeça o item 10 doespecificações adicionais do EDF+ )
+8 ascii : duração de um registro de dados, em segundos
+4 ascii : número de sinais (ns) no registro de dados
+ns * 16 ascii : ns * rótulo (ex . as especificações adicionais do EDF+ )
+ns * 80 ascii : ns * tipo de transdutor (por exemplo, eletrodo AgAgCl)
+ns * 8 ascii : ns * dimensão física (por exemplo, uV ou degreeC)
+ns * 8 ascii: ns * mínimo físico (por exemplo -500 ou 34)
+ns * 8 ascii : ns * máximo físico (por exemplo, 500 ou 40)
+ns * 8 ascii : ns * mínimo digital (por exemplo -2048)
+ns * 8 ascii : ns * máximo digital (por exemplo, 2047)
+ns * 80 ascii : ns * pré-filtragem (por exemplo, HP:0,1Hz LP:75Hz)
+ns * 8 ascii : ns * nr de amostras em cada registro de dados
+ns * 32 ascii : ns * reservado
+
+DATA RECORD nr de amostras[1] * integer : primeiro sinal no registro de dados nr de amostras[2] * integer : segundo sinal .. .. nr de amostras[ns] * integer : último sinal 
+
+
+### Exercício 6
+> Repita todos os exercícios apresentados neste módulo. Os comandos utilizados devem ser inseridos como resposta a esta questão.
+
+1.1.1 Simulando sinais biomédicos
+Em processamento de sinais é de grande relevância simularmos os sinais biomédicos, considerando o funcionamento do sistema biológico responsável por produzí-lo.
+
+Por exemplo, sabe-se que o número de vezes que respiramos por minuto é:
+
+do nascimento a 6 semanas: 30 a 40 respirações por minuto;
+6 meses: 25 a 40 respirações por minuto;
+3 anos: 20 a 30 respirações por minuto;
+6 anos: 18 a 25 respirações por minuto;
+10 anos: 17 a 23 respirações por minuto;
+Adultos: 12 a 18 respirações por minuto;
+Idosos (≥ 65 anos): 12 a 28 respirações por minuto;
+Idosos (≥ 80 anos): 10 a 30 respirações por minuto.
+O trecho de código abaixo simula sinais biomédicos que podem representar o fenômeno respiratório de acordo com a faixa etária. Como a respiração é um evento cíclico, um sinal senoidal representa de forma satisfatória o sinal biomédico.
+```{R}
+# Para instalar a versão mais atual do package dygraphs use
+# devtools::install_github(c("ramnathv/htmlwidgets", "rstudio/dygraphs"))
+
+# Aprenda mais sobre a visualização de gráficos em
+# https://rstudio.github.io/dygraphs/index.html
+
+library(dygraphs)
+
+tf <- 60 #tempo em segundos
+dt <- 0.001 #intervalo entre amostras em segundos
+
+t <- seq(from = 0, to = tf, by = dt ) # gera uma sequência (vetor tempo em segundos). Para mais informações digite ?seq
+
+f1 <- 40 # frequência respiratória de um recém-nascido
+y1 <- sin(2*pi*t*f1)
+
+f2 <- 23 # frequência respiratória de uma criança de 10 anos
+y2 <- sin(2*pi*t*f2)
+
+tWindow <- c(10, 11) # definição do intervalo de tempo (janela) para visualização de dados
+
+df1 <- data.frame(time=t, y1) #criação de um dataframe para armazenamento dos dados
+dygraph(df1, group = "G1")%>% dyRangeSelector(dateWindow = tWindow)
+
+```
+
+```{R}
+df2 <- data.frame(time=t, y2) #criação de um dataframe para armazenamento dos dados
+dygraph(df2, group = "G1") %>%dyRangeSelector(dateWindow = tWindow)
+```
+
+1.2 Séries temporais
+
+```{R}
+tWindow <- c(10, 10.05) # definição do intervalo de tempo (janela) para visualização de dados
+df2 <- data.frame(time=t, y2) #criação de um dataframe para armazenamento dos dados
+ dygraph(df2, group = "G1")  %>%dyRangeSelector(dateWindow = tWindow)%>%
+  dyOptions(stemPlot=TRUE)
+```
+
+1.2.1 Exemplo da definição de Séries Temporais
+Digamos que o trecho de código a seguir ilustre a variação da saturação periférica de oxigênio (SpO2) ao longo de 10 segundos em dois dias diferentes de monitoramento. Para esses dois dias de monitoramento, observamos duas curvas (y1 e y2) que não são idênticas, embora apresentem um comportamento bem similar.
+
+```{R}
+# Simulando a variação da SpO2 
+
+library(dygraphs)
+
+set.seed(123) # semente de aleatoriedade >>> controla o comportamento do gerador de números aleatórios
+
+t <- seq(from = 0, to = 10, by = 0.001) # vetor de tempo em segundos
+
+# Primeiro dia de monitoramento
+y1 <- 97 + sin(2*pi*60*t)+sin(2*pi*30*t)+rnorm(length(t), mean = 0.3, sd = 0.1) # função simulando a variação da SpO2
+
+# Segundo dia de monitoramento
+y2 <- 97 + sin(2*pi*60*t+(pi/6))+sin(2*pi*30*t+(pi/6))+rnorm(length(t), mean = 0.5, sd = 0.1) # função simulando a variação da SpO2
+
+dygraph(data.frame(t,y1,y2),xlab = "tempo (segundos)", ylab = "SpO2 (%)")%>%dyRangeSelector()%>%dyEvent("2.1","tempo fixo tk = 2.1", labelLoc = "bottom")
+```
+
+1.2.2 Armazenando e visualizando séries temporais biomédicas
+Veja abaixo como abrir no R arquivos nos formatos .xlsx, txt, csv e edf.
+
+```{R}
+library(openxlsx) #carrega a biblioteca "openxlsx"
+library(ggplot2) #https://ggplot2.tidyverse.org/
+library(edfReader)#https://cran.r-project.org/web/packages/edfReader/edfReader.pdf
+
+# help(read.xlsx) # sempre que desejar obter help de uma função ou package digite help(nome_da_função) 
+
+#abrindo um arquivo Excel
+df1 <- read.xlsx(xlsxFile = "V16C1RCC92.xlsx")
+
+#Plotando um gráfico estático com a biblioteca ggplot2 (a mais completa do R)
+qplot(df1$`[Time]`, df1$`[G1.X]`, data = df1) #gerando gráfico no formato rápido
+
+qplot(df1$`[Time]`, df1$`[G1.X]`, geom=c("point", "line"))
+
+# modificando as unidades do gráfico
+p <- qplot(df1$`[Time]`, df1$`[G1.X]`, geom=c("point", "line"))
+p <- p + labs(x = "tempo (s)", y="graus/s") # modificando unidades
+print(p) # imprimindo o gráfico na tela
+```
+
+```{R}
+qplot(df1$`[Time]`, df1$`[G1.X]`, geom=c("point", "line"))
+```
+
+```{R}
+# modificando as unidades do gráfico
+p <- qplot(df1$`[Time]`, df1$`[G1.X]`, geom=c("point", "line"))
+p <- p + labs(x = "tempo (s)", y="graus/s") # modificando unidades
+print(p) # imprimindo o gráfico na tela
+```
+
+```{R}
+# Outras formas de gerar gráficos (mais versáteis)
+ggplot(data=df1, aes(x=df1$`[Time]`, y=df1$`[G1.X]`)) + geom_point()
+```
+
+```{R}
+# Outras formas de gerar gráficos (mais versáteis)
+ggplot(data=df1, aes(x=df1$`[Time]`, y=df1$`[G1.X]`)) + geom_line()
+```
+
+```{R}
+ggplot(data=df1, aes(x=df1$`[Time]`, y=df1$`[G1.X]`)) + geom_point() + geom_line()
+```
+
+```{R}
+library(dygraphs)
+
+# Lendo o arquivo texto na forma de uma tabela
+df2 <- read.table("V16C1RCC92.txt",header = TRUE, sep = "\t", dec = ".", skip = 1,quote="", comment.char="")
+
+df2.1 <- data.frame(time=df2$X.Time., df2$X.G1.X.) #criação de um dataframe para armazenamento dos dados
+
+#https://www.rdocumentation.org/packages/dygraphs/versions/1.1.1.6/topics/dyAxis
+ dygraph(df2.1,main = "Velocidade angular (dps - degree per second)") %>% dyRangeSelector() %>%
+  dyAxis("x", label = "tempo(s)")%>%
+   dyAxis("y", label = "amplitude")
+```
+
+```{R}
+# Lendo o arquivo csv (com separador em ;)
+df3 <- read.csv("V16C1RCC92.csv",header = TRUE, sep =  ";")
+df3.1 <- data.frame(time=df3[[1]], amp=df3$X.A1.X.) #criação de um dataframe para armazenamento dos dados
+
+ dygraph(df3.1,main = "Acelerometria (g)") %>% dyRangeSelector() %>%
+  dyAxis("x", label = "tempo(s)")%>%
+   dyAxis("y", label = "amplitude")
+```
+
+```{R}
+# Lendo o arquivo EDF
+CHdr <- readEdfHeader("V16C1RCC92.edf") # leitura do cabeçalho
+Signals <- readEdfSignals(CHdr) # leitura dos sinais
+
+#criando vetor de tempo
+tt = seq(from=0, to=1049, by=1) * 1/Signals$`Ch: 0-:G1.X`$sRate
+
+df4 <- data.frame(time= tt, amp=Signals$`Ch: 1-:G1.Y`$signal) #criação de um dataframe para armazenamento dos dados
+
+ dygraph(df4,main = "Acelerometria - Eixo Y (g)") %>% dyRangeSelector() %>%
+  dyAxis("x", label = "tempo(s)")%>%
+   dyAxis("y", label = "amplitude")
+```
+
+### Exercício 7
+> A base de dados disponível na plataforma Moodle (ver figura abaixo) foi coletada utilizando-se o dispositivo TREMSEN (Precise Tremor Sensing), que é um dispositivo para a coleta de dados inerciais (i.e., movimentos).
+A coleta de dados foi executada considerando os seguinte protocolo:
+
+  a. Um acelerômetro triaxial foi posicionado no dorso da mão, sobre o osso Capitato.
+
+  b. O eixo X do acelerômetro foi alinhado paralelamente à terceira falange distal.
+
+  c. Os dados foram coletados enquanto o participante realizava os seguintes movimentos: – 5 flexões do punho; – 5 extensões do punho; – 5 aduções do punho; – 5 abduções do punho.
+
+  d. Os dados coletados foram salvos no formato EDF e TXT, e nomeados de acordo com o tipo de movimento realizado (Adução, Flexão e Rotação).
+
+Considerando as informações dadas, você deve:
+
+  a. Abrir o arquivo TXT no Excel e salvar uma versão deste arquivo no formato xls.
+  b. Salvar o arquivo xls gerado no formato csv.
+  c. Abrir o arquivo coletado em xls no R e gerar um gráfico utilizando a função qplot. Incluir legendas dos eixos x   - tempo (s) e y - amplitude (g).
+  d. Abrir o arquivo coletado em csv no R e gerar um gráfico utilizando a função qplot. Incluir as legendas dos eixos   x - tempo (s) e y - amplitude (g).
+  e. Abrir o arquivo coletado em edf no R e gerar um gráfico utilizando a função qplot. Incluir as legendas dos eixos   x - tempo (s) e y - amplitude (g).
+  f. Incluir todos os resultados e códigos resultantes da execução desta sequência de passos na resposta desta qestão.
+
+>Adução
+
+```{R}
+library(openxlsx) 
+library(ggplot2)
+library(edfReader)
+df1 <- read.xlsx("Aduccao.xlsx", sheet = 1, skipEmptyRows = FALSE) 
+qplot(df1$`[Time]`, df1$`[G1.X]`, data = df1)
+
+```
+
+```{R}
+qplot(df1$`[Time]`, df1$`[G1.X]`, geom=c("point", "line"))
+```
+
+```{R}
+#Incluindo legendas
+p <- qplot(df1$`[Time]`, df1$`[G1.X]`, geom=c("point", "line"))
+p <- p + labs(x = "Tempo (s)", y="Amplitude (g)") 
+print(p) 
+```
+
+```{R}
+# Lendo o arquivo csv 
+df3 <- read.csv("Aduccao.csv",header = TRUE, sep = ";")
+df3.1 <- data.frame(time=df3[[1]], amp=df3$X.G1.X.) 
+qplot(df3.1$time, df3.1$amp, data = df3.1)
+```
+
+```{R}
+  #Incluindo legenda
+p <- qplot(df3.1$`time`, df3.1$`amp`, data = df3.1, geom=c("point", "line"))
+p <- p + labs(x = "Tempo (s)", y="Amplitude (g)") 
+print(p) 
+```
+
+```{R}
+# Lendo o arquivo EDF
+CHdr <- readEdfHeader("Aduccao.edf") 
+Signals <- readEdfSignals(CHdr) 
+tt = seq(from=0, to=449, by=1) * 1/Signals$`Ch: 0-:G1.X`$sRate
+df4 <- data.frame(time= tt, amp=Signals$`Ch: 1-:G1.Y`$signal) 
+qplot(df4$`time`, df4$`amp`, data = df4)
+```
+
+```{R}
+p <- qplot(df4$`time`, df4$`amp`, data = df4, geom=c("point", "line"))
+p <- p + labs(x = "Tempo (s)", y="Amplitude (g)") 
+print(p) 
+```
+
+>Flexão 
+
+```{R}
+library(openxlsx) 
+library(ggplot2)
+library(edfReader)
+df1 <- read.xlsx("Flexao.xlsx", sheet = 1, skipEmptyRows = FALSE) 
+qplot(df1$`[Time]`, df1$`[G1.X]`, data = df1)
+```
+
+```{R}
+qplot(df1$`[Time]`, df1$`[G1.X]`, geom=c("point", "line"))
+```
+
+```{R}
+# Incluindo legendas
+p <- qplot(df1$`[Time]`, df1$`[G1.X]`, geom=c("point", "line"))
+p <- p + labs(x = "Tempo (s)", y="Amplitude (g)") 
+print(p) 
+
+```
+```{R}
+# Lendo o arquivo csv 
+df3 <- read.csv("Flexao.csv",header = TRUE, sep = ";")
+df3.1 <- data.frame(time=df3[[1]], amp=df3$X.G1.X.) 
+qplot(df3.1$`time`, df3.1$`amp`, data = df3.1)
+```
+
+```{R}
+#Incluindo legenda
+p <- qplot(df3.1$`time`, df3.1$`amp`, data = df3.1, geom=c("point", "line"))
+p <- p + labs(x = "Tempo (s)", y="Amplitude (g)") 
+print(p) 
+```
+```{R}
+# Lendo o arquivo EDF
+CHdr <- readEdfHeader("Flexao.edf") 
+Signals <- readEdfSignals(CHdr) 
+tt = seq(from=0, to=499, by=1) * 1/Signals$`Ch: 0-:G1.X`$sRate
+df4 <- data.frame(time= tt, amp=Signals$`Ch: 1-:G1.Y`$signal) 
+qplot(df4$`time`, df4$`amp`, data = df4)
+```
+
+```{R}
+p <- qplot(df4$`time`, df4$`amp`, data = df4, geom=c("point", "line"))
+p <- p + labs(x = "Tempo (s)", y="Amplitude (g)") 
+```
+
+>Rotação 
+
+```{R}
+library(openxlsx) 
+library(ggplot2)
+library(edfReader)
+df1 <- read.xlsx("Rotacao.xlsx", sheet = 1, skipEmptyRows = FALSE) 
+qplot(df1$`[Time]`, df1$`[G1.X]`, data = df1)
+```
+
+```{R}
+qplot(df1$`[Time]`, df1$`[G1.X]`, geom=c("point", "line"))
+```
+
+```{R}
+#Incluindo legenda
+p <- qplot(df1$`[Time]`, df1$`[G1.X]`, geom=c("point", "line"))
+p <- p + labs(x = "Tempo (s)", y="Amplitude (g)") 
+print(p) 
+```
+
+```{R}
+# Lendo o arquivo csv 
+df3 <- read.csv("Rotacao.csv",header = TRUE, sep = ";")
+df3.1 <- data.frame(time=df3[[1]], amp=df3$X.G1.X.) 
+qplot(df3.1$`time`, df3.1$`amp`, data = df3.1)
+```
+
+```{R}
+#Incluindo legenda
+p <- qplot(df3.1$`time`, df3.1$`amp`, data = df3.1, geom=c("point", "line"))
+p <- p + labs(x = "Tempo (s)", y="Amplitude (g)") 
+print(p) 
+```
+
+```{R}
+# Lendo o arquivo EDF
+CHdr <- readEdfHeader("Rotacao.edf") 
+Signals <- readEdfSignals(CHdr) 
+tt = seq(from=0, to=499, by=1) * 1/Signals$`Ch: 0-:G1.X`$sRate
+df4 <- data.frame(time= tt, amp=Signals$`Ch: 1-:G1.Y`$signal) 
+qplot(df4$`time`, df4$`amp`, data = df4)
+```
+
+```{R}
+p <- qplot(df4$`time`, df4$`amp`, data = df4, geom=c("point", "line"))
+p <- p + labs(x = "Tempo (s)", y="Amplitude (g)") 
+print(p) 
+```

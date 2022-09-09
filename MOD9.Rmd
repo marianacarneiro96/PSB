@@ -1,0 +1,333 @@
+---
+title: "Lista do Módulo 9"
+author: "Mariana Soares Carneiro - 11811EBI012"
+output: 
+  html_document:
+    highlight: tango
+    includes:
+      after_body: psbfix.html
+---
+
+# Módulo 9
+
+### Exercício 1
+> Calcule os coeficientes da DFT para a sequência x(n)={−1,1,2,−2}. Utilize a definição básica da DFT para realizar o cálculo.
+
+```{r}
+xn <- c(-1, 1, 2, -2) # sequência de entrada
+N <- 4 # quantidade de pontos da sequência
+k <- seq(from = 0, to = N-1, by = 1)
+n <- seq(from = 0, to = N-1, by = 1)
+W <- function(k, n, N){
+ exp(-1i * (2 * pi / N) * k *n)
+}
+X <- complex(length.out = N)
+for (i in 1:N) {
+ X[i] <- sum(W(k[i], n, N)*xn)
+}
+print(X, digits = 2)
+```
+
+### Exercício 2
+> Calcule a matriz de rotação de fatores, W, para a sequência x(n)={−1,1,2,−2}. Calcule os coeficientes da DFT e da IDFT baseado nesta matriz.
+
+>> Calculando a matriz de rotação W, utilizando a matriz de DTF para n = 4
+
+```{R echo=FALSE}
+knitr::include_graphics("matrizW.png")
+```
+
+>> As propriedades de simetria e periodicidade podem ser utilizadas com o intuito de calcular os fatores de rotação, sendo assim, pode-se considerar:
+
+```{R echo=FALSE}
+knitr::include_graphics("considerando.png")
+```
+
+>> Os termos podem, então, ser calculados: 
+
+```{R echo=FALSE}
+knitr::include_graphics("termos.png")
+```
+
+>> Por fim, a matriz de rotação será definida por: 
+
+```{R echo=FALSE}
+knitr::include_graphics("matrizrot.png")
+```
+
+>> Calculando os coeficientes da DFT e da IDFT: 
+
+```{r}
+xn <- c(-1, 1, 2, -2) # sequência de entrada
+w = matrix(c(1, 1, 1, 1,
+ 1, -1i, -1, 1i,
+ 1, -1, 1, -1,
+ 1, 1i, -1, -1i),
+ nrow = 4,
+ ncol = 4,
+ byrow = T)
+X <- w %*% xn # coeficientes da DFT
+print(X)
+```
+
+```{r}
+N <- 4
+INV <- (1/N) * Conj(w)
+x1 <- INV %*% X # cálculo da inversa da DFT
+print(x1)
+```
+
+### Exercício 3
+> Assumindo que a sequência x(n)={−1,1,2,−2} foi amostrada a $fs$=33 Hz, qual a resolução em frequência da DFT?
+
+```{r}
+fs <- 33 # frequência amostrada
+N <- 4 # quantidade de números da amostra
+deltaf <- (fs/ N) 
+print(deltaf)
+```
+
+### Exercício 4 
+> Gere um sinal senoidal, oscilando a 20 Hz, amostrado a 500 Hz. Calcule o espectro de amplitude e de fase da DFT para o sinal. Plote os gráficos dos espectros obtidos. Dica: o intervalo entre os coeficientes da DFT é a resolução em frequência em Hz.
+
+```{r}
+library(dygraphs)
+# Gerando o sinal
+fs <- 500
+dt <- 1/fs
+t <- seq(from = 0, to = 5, by = dt)
+f <- 20
+y <- sin(2*pi*f*t)
+dygraph(data.frame(t, y), main = "Sinal gerado",
+ xlab = "Tempo(s)",
+ ylab = "Amplitude") %>%
+ dyRangeSelector(c(100*dt, 200*dt))
+```
+
+```{r}
+# Análise no dominio da frequencia
+delta <- fs/length(y)
+fn <- (length(y) - 1)*delta
+ff <- seq(from = 0, to = fn, by = delta)
+y_fft <- fft(y)
+# Espectro de amplitude
+mag <- Mod(y_fft)
+dygraph(data.frame(ff, mag), main = "Espectro de Amplitude",
+ xlab = "Frequência (Hz)",
+ ylab = "Amplitude") %>%
+ dyRangeSelector()
+```
+
+```{r}
+# Espectro de fase
+theta <- atan2(Im(y_fft), Re(y_fft))
+dygraph(data.frame(ff, theta), main = "Espectro de Fase",
+ xlab = "Frequência (Hz)",
+ ylab = "Fase") %>%
+ dyRangeSelector()
+```
+
+### Exercício 5
+> Explique o que é ordenação bit-reversa e forneça um exemplo de aplicação da mesma sobre a sequência de caracteres $hojeodiaestabelo$. Qual a sequência resultante?
+
+```
+A ordenação bit-reversa é a ordenação de uma sequência de n itens, em que n = 2^k. Esta ordenação é definida pela indexação dos elementos da sequência pelos números inteiros de 0 a n-1 e então pela reversão da representação binária de cada um destes números.
+```
+```{r}
+i = 1
+text <- c("H","O","J","E","O","D","I","A","E","S","T","A","B","E","L","O")
+k_dec <- c(0:(length(text)-1))
+k_bin <- c("0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000","1001", "1010", "1011", "1100", "1101", "1110", "1111")
+strReverse <- function(x) # invertendo a string
+ return (sapply(lapply(strsplit(x, NULL), rev), paste, collapse=""))
+k_rev <- k_bin[1]
+# Laço para montar o K reverso
+for (i in 2:length(text)){
+ k_rev <- c(k_rev, strReverse(k_bin[i]))
+}
+text_rev <- text[1]
+# Laço para montar o texto reverso
+for (i in 2:length(text)){
+   for (j in 2:length(text)){
+ if (k_rev[i] == k_bin[j]){
+ text_rev <- c(text_rev, text[j])
+  }
+ }
+}
+# Apresentando o resultado em tabela
+df <- rbind(text, k_dec, k_bin, k_rev, text_rev)
+rownames(df) <- c("Sequência", "K(Decimal)", "K(Binário)", "K(Bin.Reverso)", "Sequência Ordenada")
+colnames(df) <- c("-", "-", "-", "-", "-", "-", "-","-", "-", "-", "-", "-", "-", "-", "-", "-")
+knitr::kable(df)
+```
+
+### Exercício 6
+> Desenhe um diagrama de butterfly para 16 amostras. Apresente as equações de cada saída X(k). Qual o ganho em velocidade da FFT quando comparado à DFT neste exemplo?
+
+```{R echo=FALSE}
+knitr::include_graphics("desenho6.png")
+```
+
+>> Utilizando as propriedades de simetria, obtém-se as seguintes equações:
+
+```{R echo=FALSE}
+knitr::include_graphics("eqsim.png")
+```
+
+### Exercício 7
+> No ambiente do R, leia o help da função fft (package: stats). Neste help existe uma implementação da DTF. Estude e comente os códigos apresentados no exemplo. Execute o exemplo, utilizando o sinal de entrada Z, e calculando os coeficientes da DFT por meio da equação geral e por meio da DFT. Utilize o trecho de código abaixo para calcular a diferença temporal entre a DFT e a FFT.
+
+```{r}
+ptm <- proc.time()
+# Digite sua função aqui
+proc.time() - ptm
+```
+
+```{r}
+tam <- 1:4
+fft(tam)
+```
+
+```{r}
+fft(fft(tam), inverse = TRUE)/length(tam)
+```
+
+```{r}
+# Cálculo DFT:
+fft0 <- function(m, inverse=FALSE)
+{
+ n <- length(m)
+ if(n == 0) return(m)
+ k <- 0:(n-1)
+ ff <- ( if(inverse) {1} else {-1}) * 2*pi * 1i * k/n
+ vapply(1:n, function(h) sum(m * exp(ff*(h-1))), complex(1))
+}
+relD <- function(x,y) 2* abs(x - y) / abs(x + y)
+n <- 2^8
+#arranjo de número reais ou complexos a serem transformados
+m <- complex(n, rnorm(n), rnorm(n))
+#diferenças relativas na ordem 4*10^{-14} :
+summary(relD(fft(m), fft0(m)))
+```
+
+```{r}
+#calculando transformada inversa não normalizada
+summary(relD(fft(m, inverse=TRUE), fft0(m, inverse=TRUE)))
+```
+
+```{r}
+ptm <- proc.time()
+fft(tam)
+```
+
+```{r}
+fft(fft(tam), inverse = TRUE)/length(tam)
+```
+
+```{r}
+fft0 <- function(m, inverse=FALSE)
+{
+ n <- length(m)
+ if(n == 0) return(m)
+ k <- 0:(n-1)
+ ff <- (if(inverse) 1 else -1) * 2*pi * 1i * k/n
+ vapply(1:n,function(h) sum(m * exp(ff*(h-1))), complex(1))
+}
+```
+
+### Exercício 8
+> Gere um sinal y, formado pela adição de três componentes senoidais, de amplitude unitária, e oscilando a 10, 23 e 49 Hz. Adicione um ruído gaussiano ao sinal y, cuja amplitude máxima é no máximo 10% o valor máximo do sinal. Calcule, por meio do uso da função fft, o espectro de amplitude e fase para o sinal resultante. Adote a frequência de amostragem de 700 Hz, e a duração total do sinal de 10 segundos.
+
+```{r}
+library(dygraphs)
+# Sinal com senóides
+fs <- 700
+dt <- 1/fs
+t <- seq(from = 0, to = 10, by = dt)
+f1 <- 10
+y1 <- sin(2*pi*f1*t)
+f2 <- 23
+y2 <- sin(2*pi*f2*t)
+f3 <- 49
+y3 <- sin(2*pi*f3*t)
+y <- y1 + y2 + y3
+dygraph(data.frame(t, y), main = "Soma das Senóides",
+ xlab = "Tempo (s)",
+ ylab = "Amplitude") %>%
+ dyRangeSelector(c(100*dt, 400*dt))
+```
+
+```{r}
+# Inserido o ruído
+set.seed(1234)
+s <- y + 0.1*max(y)*rnorm(length(t))
+dygraph(data.frame(t, s), main = "Sinal Gerado",
+ xlab = "Tempo (s)",
+ ylab = "Amplitude") %>%
+ dyRangeSelector(c(100*dt, 400*dt))
+```
+
+```{r}
+# Análise no domínio da frequência
+delta <- fs/length(t)
+fn <- (length(t)-1)*delta
+ff <- seq(from = 0, to = fn, by = delta)
+s_fft <- fft(s)
+# Espectro de amplitude
+mag <- Mod(s_fft)
+dygraph(data.frame(ff, mag), main = "Espectro de Amplitude",
+ xlab = "Frequência (Hz)",
+ ylab = "Amplitude") %>%
+ dyRangeSelector()
+
+```
+
+```{r}
+# Espectro de fase
+theta <- atan2(Im(s_fft), Re(s_fft))
+dygraph(data.frame(ff, theta), main = "Espectro de Fase",
+ xlab = "Frequência (Hz)",
+ ylab = "Fase") %>%
+ dyRangeSelector(c(100*delta, 200*delta))
+```
+
+```{r}
+# Gerando espectrograma
+library(signal)
+library(oce)
+Espectrograma <- function(nfft, wnd, overlap, y.signal, fs){
+ spec <- specgram(x = y.signal,
+ n = nfft,
+ Fs = fs,
+ window = wnd,
+ overlap = overlap)
+ P <- abs(spec$S)
+ P <- P/max(P)
+ P <- 20*log10(P)
+ t <- spec$t
+ f <- spec$f
+ espc <- list(t, f, P)
+ return(espc)
+}
+escp.s <- Espectrograma(2048, 256, 128, s, fs)
+imagep(x = escp.s[[1]],
+ y = escp.s[[2]],
+ z = t(escp.s[[3]]),
+ col = oce.colorsViridis,
+ ylab = 'Frequencia [Hz]',
+ xlab = 'Tempo [s]',
+ drawPalette = T,
+ decimate = F)
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```

@@ -1,0 +1,336 @@
+---
+title: "Lista do Módulo 8"
+author: "Mariana Soares Carneiro - 11811EBI012"
+output: 
+  html_document:
+    highlight: tango
+    includes:
+      after_body: psbfix.html
+---
+
+# Módulo 8
+
+### Exercício 1
+
+> Dado a frequência f = 0.3rad/s, calcule os valores de frequência em ciclos/s, rad/amostra e ciclos/amostra. Assuma o valor de fs=200 Hz.
+
+```{R}
+freqs <- function(rad, fs)
+{
+ # Ciclos por segundo (Hz)
+ HZ <- rad / (2*pi)
+ cat(HZ, 'Hz\n')
+ # Radianos por amostra
+ omega <- (2*pi*HZ) / fs
+ cat(omega, 'rad/amostra\n')
+ # Ciclos por amostra
+ f <- HZ / (fs/2)
+ cat(f, 'ciclos/amostra')
+}
+freqs(0.3, 200)
+
+```
+
+### Exercício 2
+
+> Gere 5 segundos de um sinal s, que deve ser a soma de dois sinais senoidais, sendo um oscilando a 60 ciclos/s e o outro a 100 ciclos por segundo. Adote a frequência de amostragem de 1,2 kHZ. Aplique a equação recursiva ao sinal s e responda às questões abaixo:
+       $y[n]=1.8523y[n−1]−0.94833y[n−2]+x[n]−1.9021x[n−1]+x[n−2]$
+
+```{R}
+library(dygraphs)
+library(htmltools)
+library(ggplot2)
+library(plotly)
+fs <- 1200 # frequência de amostragem (Hz)
+dt <- 1/fs #resolução temporal (s)
+tf <- 5 # tempo final (s)
+t <- seq(from = 0, to = tf, by = dt) # vetor tempo
+# Frequências de oscilação
+f1 <- 60
+f2 <- 100
+# Senoides
+senoide1 <- sin(2*pi*f1*t)
+senoide2 <- sin(2*pi*f2*t)
+dygraph(data.frame(t,senoide1,senoide2),
+ xlab = "tempo (s)",
+ ylab = "amplitude",
+ main = "60Hz (verde) e 100Hz (azul)")%>%
+ dyRangeSelector(c(100*dt, 200*dt))
+```
+
+
+```{R}
+soma <- senoide1 + senoide2
+dygraph(data.frame(t,soma),
+ xlab = "tempo (s)",
+ ylab = "amplitude",
+ main = "Soma das senóides")%>%
+ dyRangeSelector(c(100*dt, 200*dt))
+
+```
+
+
+```{R}
+# Número de amostras para o sinal amostrado
+nmax <- floor(5/dt)
+# Vetor número de amostras para o sinal amostrado
+n <- 0:nmax
+N <- n*dt
+p <- ggplot(data.frame(N,soma),aes(N,soma))+geom_line()+geom_point()+theme_bw()+xlab("Tempo")+ ylab("Amplitude")+ xlim(c(0, 0.1))+ ggtitle("Sinal com as amostras")
+ggplotly(p)
+
+```
+
+```{R echo=FALSE}
+knitr::include_graphics("explicacao.png")
+```
+
+```{R}
+library(signal)
+b <- c(1,-1.9021,1)
+a <- c(1,-1.8523,0.94833)
+bt <- Arma(b = b , a = a)
+y_filt <- filtfilt(filt = bt, soma)
+p2 <- ggplot(data.frame(N,y_filt),aes(N,y_filt))+ geom_line()+ geom_point()+ theme_bw()+ xlab("Tempo")+ ylab("Amplitude")+ xlim(c(0, 0.1))+ ggtitle("Sinal resultante da equação recursiva")
+ggplotly(p2)
+```
+
+> a) Qual foi o principal efeito de se aplicar a equação de $y[n]$ sobre o sinal $s$?
+
+```
+Como a equação y[n] representa um filtro, ao aplicá-la ao sinal s o resultado obtido foi uma senoide de 100Hz, dessa forma pode-se afirmar que a componente de 60Hz foi retirada do sinal
+```
+> b) Esboce o diagrama de blocos que ilustre o processador descrito por $y[n]$.
+
+```{R echo=FALSE}
+knitr::include_graphics("2b.png")
+```
+
+### Exercício 3
+> Calcule a resposta ao impulso unitário, h[n], para o processador: $y[n]=y[n−1]+1Lx[n]−x[n−L]$.
+
+```{R}
+library(dygraphs)
+# Impulso unitário
+n <- c(-10:10)
+tam <- ((length(n)-1)/2)
+delta <- c(rep(0,tam),1,rep(0,tam))
+dt <- data.frame(delta,n)
+dygraph(data.frame(n,delta), xlab = "tempo", ylab = "amplitude", main = "Impulso unitário")%>%
+   dySeries(stemPlot=TRUE)
+```
+
+```{R echo=FALSE}
+knitr::include_graphics("explicacao2.png")
+```
+
+```{R echo=FALSE}
+knitr::include_graphics("explicacao3.png")
+```
+
+```{R}
+# Aplicando o processador ao impulso unitário para L=7
+L<-7
+b <- c(1/L,rep(-1,L))
+a <- c(1,-1)
+bt <- Arma(b = b , a = a)
+y_filt <- filtfilt(filt = bt, delta)
+h <- ggplot(data.frame(n,y_filt),aes(n,y_filt))+
+ geom_line()+
+ geom_point()+
+ theme_bw()+
+ xlab("Tempo")+
+ ylab("Amplitude")+
+ ggtitle("Sinal")
+ggplotly(h)
+```
+
+### Exercício 4
+
+> Gere 5 segundos de um sinal senoidal amostra a 500 Hz, oscilando a 30 Hz, e adicione ruído gaussiano (com amplitude de no máximo 10% ao valor máximo do sinal senoida). Aplique o processador da questão 3 ao sinal resultante. Qual foi o efeito observado? Plote os gráficos do sinal origina, corrompido e processado.
+
+```{R}
+library(dygraphs)
+library(signal)
+# Senoide
+fs <- 500
+dt <- 1/fs
+tf <- 5
+t <- seq(from = 0, to = tf, by = dt)
+f <- 30
+senoide1 <- sin(2*pi*f*t)
+dygraph(data.frame(t,senoide1),
+ xlab = "Tempo (s)",
+ ylab = "Amplitude",
+ main = "Sinal original (senoide de 30Hz)")%>%
+ dyRangeSelector(c(0, 1))
+```
+
+```{R}
+# Ruido Gaussiano
+set.seed(1234)
+senoide2 <- senoide1 + 0.3* max(senoide1) * rnorm(length(t))
+dygraph(data.frame(t,senoide1,senoide2),
+ xlab = "tempo (s)",
+ ylab = "amplitude",
+ main = "Sinal corrompido")%>%
+ dyRangeSelector(c(0, 1))
+```
+
+
+```{R}
+# Aplicando filtro da questão 3 para L = 7
+L <- 15
+b <- c(1/L,rep(-1,L))
+a <- c(1,-1)
+bt <- Arma(b = b , a = a)
+senoide_filt <- filtfilt(filt = bt, senoide2)
+dygraph(data.frame(t,senoide_filt),
+ xlab = "Tempo (s)",
+ ylab = "Amplitude",
+ main = "Sinal processado")%>%
+ dyRangeSelector(c(0, 1))
+
+```
+
+```
+Quanto maior o valor de L, maior a atenuação da componente senoidal. No entando, foi obtida outra componente com amplitude maior.
+```
+
+### Exercício 5
+
+> Calcule a resposta em frequência, $H(z)$ de $y[n]=0.5[x(n)+x[n−1]]$. Faça o gráfico da amplitude e fase. Que tipo de processador é esse?
+
+```{R echo=FALSE}
+knitr::include_graphics("explicacao4.png")
+```
+
+```{R}
+library(REdaS)
+b <- c(0.5, 0.5)
+fresponse <- freqz(b) # calculando a resposta em frequência
+absH <- abs(fresponse$h) # Valor absoluto da resposta em frequência
+phi <- atan2(Im(fresponse$h), Re(fresponse$h)) # fase em radianos
+phi_deg <- rad2deg(phi) # fase em graus
+absH_DB <- 20 * log10(absH) # Valor absoluto em dB
+dfplot <- data.frame(freq = fresponse$f, h = fresponse$h, phi, absH) # Armazenando as informações em um data frame
+# Plotando as respostas
+ggplot(data = dfplot, aes(x=freq, y=absH)) + geom_line() + theme_classic() + ggtitle("Valor absoluto x frequência")
+```
+
+```{R}
+ggplot(data = dfplot, aes(x=freq, y= phi_deg)) + geom_line() + theme_classic() + ggtitle("Fase em graus x frequência")
+```
+
+```{R}
+ggplot(data = dfplot, aes(x=freq, y=absH_DB)) + geom_line() + theme_classic() + ggtitle("Valor absoluto (dB) x frequência")
+```
+
+```
+O processador dependa da entrada e é não recursivo, dessa forma pode-se classificá-lo como FIR. Por ser um filtro média móvel, é representado pela equação:
+```
+```{R echo=FALSE}
+knitr::include_graphics("explicacao5.png")
+```
+
+```
+Em que L é igual a 2 no processador da questão. Após a observação das respostas em frequência é possível dizer que também é um filtro passa-baixa.
+```
+
+### Exercício 6
+
+> Simule três bursts de sinais eletromiográficos em um tempo de 10 s. Cada burst deve ter a duração de 2 segundos. Assuma que o sinal foi amostrado a 1000 Hz. Promova um ganho de 1.2 vezes nos trecho em que há atividade eletromiográfica. Filtre o sinal gerado com um fitro passa-baixa, com frequência de corte de 5 Hz e ordem 3. Faça a comparação entre sinais filtrados pelos filtros Butterworth e Chebyshev. Plote os gráficos dos sinais obtidados e as respostas em frequência dos filtros utilizados. Dicas: (i) para a geração do sinal utilize a função randn. (ii) Para a filtragem do sinal utilize a função filtfilt.
+
+```{R}
+library(dygraphs)
+library(tuneR)
+
+fs <- 1000 # Frequência de amostragem
+dt <- 1/fs # Resolução temporal
+tf <- 10 # Tempo final
+t <- seq(from=0, to=tf, by=dt) # Vetor tempo
+f1 <- 3 # Número de bursts
+# Onda quadrada
+ysquare <- square(f1, samp.rate = fs, duration = tf+dt, xunit = "time")@left
+# Sinal do burst
+yburst <- noise(kind = "white", samp.rate = fs, duration = tf+dt, xunit = "time")@left
+# Ruido
+yruido <- rnorm(length(t))
+# Trechos de ruido
+indx1 <- which(ysquare == -1.0)
+sinal_emg <- rep(NA, length(yruido))
+sinal_emg[indx1] <- yruido[indx1]
+# Trechos com burst
+indx2 <- which(ysquare > -1.0)
+sinal_emg[indx2] <- yburst[indx2]*20
+# Armazenando dado em um data frame
+df_emg <- data.frame(time = t, sinal = sinal_emg)
+# Plotando o gráfico
+dygraph(df_emg, main = "Três bursts de sinais eletromiográficos",
+ xlab = "Tempo",
+ ylab = "Amplitude")%>%
+ dyRangeSelector()
+```
+
+```{R}
+# Ganho de 1.2
+sinal_emg[indx2] <- yburst[indx2]*1.2*20
+# Filtro Butterworth
+library(signal)
+n <- 3 # Ordem do filtro
+Fs <- 1000 # Frequência de amostragem em Hz
+Fc <- 5 # Frequência de corte em Hz
+W <- Fc/(Fs/2) # Frequência de Nyquist
+# Coeficientes do fitro
+bt <- butter(n, W, type = "low")
+freqz(filt = bt, Fs = Fs)
+```
+
+```{R}
+# Aplicando o filtro no sinal
+y_filt <- filtfilt(filt = bt, sinal_emg)
+# Plotando o sinal filtrado
+dfplot1 <- data.frame(time = t, y_filt)
+dygraph(dfplot1)
+```
+
+```{R}
+# Filtro Chebyshev
+# Frequência de Nyquist
+W <- Fc/(Fs/2)
+Rp <- 0.5
+# Coeficientes do fitro
+bt <- cheby1(n, Rp, W, type = "low")
+freqz(filt = bt, Fs = Fs)
+```
+
+```{R}
+# Aplicando o filtro no sinal
+y_filt2 <- filtfilt(filt = bt, sinal_emg)
+# Plotando o sinal filtrado
+dfplot2 <- data.frame(time = t, y_filt2)
+dygraph(dfplot2)
+```
+
+```{R}
+# Comparando os dois sinais filtrados
+dygraph(data.frame(t, y_filt, y_filt2),
+ main = "Comparação dos dois sinais filtrados",
+ xlab = "Tempo",
+ ylab = "Amplitude")%>%
+ dyRangeSelector()
+
+```
+
+```{R}
+print(max(y_filt))
+
+```
+
+```{R}
+print(max(y_filt2))
+```
+
+```
+Através de uma análise dos gráficos e dos valores de pico dos sinais filtrados, pode-se dizer que o sinal submetido ao filtro Chebyshev possui maior amplitude em relação ao sinal submetido ao filtro Butterworth. Este fato pode ter acontecido porque o filtro Chebyshev possui menor atenuação. Ademais, é perceptível que ambos se tratam de filtros do tipo passa-baixa, já que as componentes de frequências altas foram retirados.
+```

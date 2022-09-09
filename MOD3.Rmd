@@ -1,0 +1,831 @@
+---
+title: "Lista do Módulo 3"
+author: "Mariana Soares Carneiro"
+output: 
+  html_document:
+    highlight: tango
+    includes:
+      after_body: psbfix.html
+---
+
+# Módulo 3
+
+### Exercício 1
+> Repita e explique a finalidade de cada um dos exemplos realizados neste tutorial.
+
+#### Sinal Analógico
+```{R}
+# Simulação de um sinal analógico no R
+library(dygraphs)
+
+fs <- 1000 # frequência de amostragem em Hz, ou seja, a quantidade de amostras por unidade de tempo
+dt <- 1/fs # resolução temporal em segundos
+tf <- 5 # tempo final em segundos
+t <- seq(from = 0, to = tf, by = dt) # vetor de tempo
+
+f <- 30 # frequência de oscilação
+
+y <- cos(2*pi*f*t) 
+
+dygraph(data.frame(t,y), xlab = "tempo (em segundos)", ylab = "amplitude", main = "Sinal Analógico", group = "S")%>%dyRangeSelector(dateWindow = c((517-1)*dt, (600-1)*dt))
+```
+
+#### Sinal Discreto
+```{R}
+#Simulação de um sinal discreto no R
+dygraph(data.frame(t,y), xlab = "tempo (em segundos)", ylab = "amplitude", main = "Sinal Discreto", group = "S")%>%dyRangeSelector(dateWindow = c((517-1)*dt, (600-1)*dt)) %>% dySeries(stemPlot=TRUE)
+```
+
+#### Resolução Temporal
+```{R}
+library(openxlsx) #carrega a biblioteca "openxlsx" 
+library(dygraphs)
+#library(ggplot2) #https://ggplot2.tidyverse.org/
+
+#lendo dados de séries temporais no excel
+#digite help(read.xlsx) para compreender todos os parâmetros
+
+df1 <- read.xlsx("Dados1.xlsx", sheet = 1, skipEmptyRows = FALSE, rows = c(1:10000)) #função read.xlsx lê o arquivo e envia os dados para o data.frame df1
+
+dt <- df1$Tempo[2] - df1$Tempo[1] # cálculo da resolução temporal em segundos
+#Plotagem do gráfico
+dygraph(data.frame(time=df1$Time, y1 = df1$EMG1, y2=df1$EMG1), group="EMG") %>%
+    dyRangeSelector()%>%
+    dySeries("y1",stemPlot=TRUE)
+```
+
+#### Eventos Discretos
+```{R}
+library(pracma) #package para usar a função findpeaks
+library(htmltools)
+
+# Estabelecendo os picos importantes, definição do limiar em 40% do valor do pico máximo
+th <- max(df1$EMG1, na.rm = TRUE)*0.4 # limiar
+
+# Função findpeaks pertence a biblioteca pracma usada para definir o valor mínimo do pico 
+pp <- findpeaks(df1$EMG1, minpeakheight=th) #encontrando picos (esta função retorna uma matriz)
+
+indxpeaks <- pp[ , 2] #retorna a segunda coluna da matriz (que contém os índices em que os picos aconteceram)
+
+df1$peaks <- NA #inicializando um vetor com dados faltantes (NA = not a number)
+
+df1$peaks[indxpeaks] <- df1$EMG1[indxpeaks] # valor do sinal onde os picos ocorreram
+
+# Plotando os gráficos com dygraph
+d1 <- dygraph(df1, group="E1")%>%
+    #dyOptions(connectSeparatedPoints=TRUE)%>%
+    dySeries("peaks",stemPlot=TRUE)%>%
+    dyAxis("y", valueRange = c(-1, 1)) %>% 
+  dyLegend(width = 400)%>% 
+  dyLimit(th, "Max",
+          strokePattern = "solid", color = "blue")%>%
+    dyRangeSelector()
+  
+
+d2 <- dygraph(df1[c("Time", "peaks")], main="Eventos discretos", group="E1")%>%
+    #dyOptions(connectSeparatedPoints=TRUE)%>%
+    dySeries("peaks",stemPlot=TRUE)%>%
+    dyAxis("y", valueRange = c(-1, 1)) %>% 
+  dyLegend(width = 400)%>% 
+  dyLimit(th, "Max",
+          strokePattern = "solid", color = "blue")%>%
+    dyRangeSelector()
+
+dy_graph <- list(d1,d2)
+# biblioteca para renderizar os gráficos
+htmltools::browsable(htmltools::tagList(dy_graph))
+```
+
+#### Sinais amostrados: conceitos básicos
+```{R}
+## Definindo um vetor de tempo e uma frequência de amostragem
+fs <- 500 #frequência de amostragem em Hz
+dt <- 1/fs #resolução temporal em segundos
+ti <- 0.0 # tempo inicial em segundos
+tf <- 3.5 # tempo final em segundos
+
+t <- seq(from=ti, to=tf, by=dt) # vetor de tempo discreto (em segundos)
+
+length(t) # número de amostras, N, do vetor de tempo discreto
+```
+
+```{R}
+min(t) # tempo mínimo (s)
+```
+
+```{R}
+max(t) # tempo máximo (s)
+```
+
+#### Exemplos de sinais amostrados
+```{R}
+# Através da definição de um vetor de tempo discreto pode-se criar os sinais
+library(tuneR)
+
+freq1 <- 10
+y1 <- sawtooth(freq1, samp.rate = fs, duration = tf+dt,xunit = "time")@left
+d1 <- dygraph(data.frame(time=t, y1)) %>%dyRangeSelector() %>% dyOptions(drawPoints = TRUE, pointSize = 2)
+
+y2 <- noise(kind="white", samp.rate = fs, duration = tf+dt,xunit = "time")@left
+d2 <- dygraph(data.frame(time=t, y2)) %>%dyRangeSelector()
+
+y3 <- pulse(freq1, samp.rate = fs, duration = tf+dt,xunit = "time")@left
+d3 <- dygraph(data.frame(time=t, y3)) %>%dyRangeSelector() %>% dySeries("y3", stemPlot = TRUE)
+
+y4 <- square(freq1, samp.rate = fs, duration = tf+dt,xunit = "time")@left
+d4 <- dygraph(data.frame(time=t, y4)) %>%dyRangeSelector() %>% dyOptions(drawPoints = TRUE, pointSize = 2)
+
+
+dy_graph <- list(d1,d2,d3, d4)
+# biblioteca para renderizar os gráficos
+htmltools::browsable(htmltools::tagList(dy_graph))
+```
+
+#### Exemplo de quantização
+```{R}
+#Quantização é realizada por componentes internos de um conversor A/D
+library(dygraphs)
+
+#library(lambda.tools)
+fs <- 1000 # frequência de amostragem em Hz
+dt <- 1/fs # resolução temporal em segundos 
+tf <- 5 # tempo final (em segundos) do evento
+t <- seq(from = 0, to = tf, by = dt) # vetor de tempo
+
+f <- 30 # frequência de oscilação
+
+y <- cos(2*pi*f*t) 
+
+y <- ifelse(y > 0.98, 1, y) # esse passo é necessário para evitar erros de arredondamento (a intenção é aproximar o valor 0.98 para 1)
+
+Vmax <- max(y) # valor máximo
+Vmin <- min(y) # valor mínimo
+
+k <- 2 # número de bits
+
+Q <- (Vmax - Vmin)/2^k # resolução A/D
+
+qts <- seq(from = Vmin, to = Vmax, by = Q) # níveis disponíveis 
+
+# Quando quantizamos um sinal analógico, pretendemos gerar uma aproximação para este de acordo com determinados níveis.
+
+yq <- qts[findInterval(y, qts)]
+  
+#lambda.tools::quantize(y,bins = qts) # aproximando o sinal aos níveis disponíveis
+
+dygraph(data.frame(t, y, yq), xlab = "tempo (segundos)", ylab = "amplitude", main = "Sinal Quantizado")%>%dyRangeSelector(c((517-1)*dt, (600-1)*dt))
+```
+
+#### Exemplo: compreendendo melhor o efeito de aliasing
+```{R}
+library(ggplot2)
+library(plotly)
+fs <- 40 # frequencia de amostragem (em Hz)
+dt <- 1/fs # resolucao temporal (em segundos) 
+t <- seq(from = 0, to = 5, by = dt) # vetor de tempo
+f <- 1 # frequencia de oscilacao (em Hz)
+ys <- sin(2*pi*f*t) # sinal de interesse
+# Plotando com ggplotly
+p<-ggplot(data.frame(t,ys),aes(t,ys))+geom_line()+theme_bw()+xlab("tempo")+ylab("amplitude")
+ggplotly(p)
+```
+
+```{R}
+# Modificando a frequência de amostragem para parecer tempo contínuo
+fs2 <- 100 # frequencia de amostragem (>> 2 * f_sinal)
+dt2 <- 1/fs2 # resolucao temporal p/ o sinal amostrado a 100 Hz
+nmax2 <- floor(5/dt2) # numero de amostras p/ o sinal amostrado a 100 Hz 
+n2 <- 0:nmax2 # vetor numero de amostras
+ys2 <- sin(2*pi*f*n2*dt2) # sinal amostrado a 100 Hz
+# Plotando com ggplotly
+p<-ggplot(data.frame(n2*dt2,ys2),aes(n2*dt2,ys2))+geom_line()+geom_point()+theme_bw()+xlab("tempo")+ylab("amplitude")
+ggplotly(p)
+```
+
+```{R}
+# Alterando a frequência da amostragem e ainda assim encontrando um sinal com amostragem adequada
+fs3 <- 15 # frequencia de amostragem (> 2 * f_sinal)
+dt3 <- 1/fs3 # resolucao temporal p/ o sinal amostrado a 15 Hz 
+nmax3 <- floor(5/dt3) # numero de amostras p/ o sinal amostrado a 15 Hz 
+n3 <- 0:nmax3 # vetor numero de amostras p/ o sinal amostrado a 15 Hz 
+ys3 <- sin(2*pi*f*n3*dt3) # sinal amostrado a 15 Hz
+
+# Plotando com ggplotly
+p<-ggplot(data.frame(n3*dt3,ys3),aes(n3*dt3,ys3))+geom_line()+geom_point()+theme_bw()+xlab("tempo")+ylab("amplitude")
+ggplotly(p)
+```
+
+```{R}
+# Quando se utiliza uma frequência de amostragem inferior ao dobro da frequência do sinal, temos a impressao de que a amostras provém de um sinal diferente
+fs4 <- 0.75 # frequencia de amostragem (< 2 * f_sinal)
+dt4 <- 1/fs4 # resolucao temporal p/ o sinal amostrado a 0.75 Hz
+nmax4 <- floor(5/dt4) # numero de amostras p/ o sinal amostrado a 0.75 Hz 
+n4 <- 0:nmax4 # vetor numero de amostras p/ o sinal amostrado a 0.75 Hz
+ys4 <- sin(2*pi*f*n4*dt4) # sinal amostrado a 0.75 Hz
+
+df11<-data.frame(time=t,y=ys) 
+df2<-data.frame(time=n4*dt4,y=ys4)
+# Plotando o gráfico com ggplotly
+p<-ggplot(df11,aes(time,y))+geom_line()+geom_point(data=df2,aes(time,y))+theme_bw()+xlab("tempo")+ylab("amplitude")
+ggplotly(p)
+```
+
+```{R}
+# O exemplo anterior é equivalente ao ao sinal senoidal de 0.25 Hz
+yc = sin(2*pi*0.25*t) # sinal senoidal de 0.25 Hz
+
+df11<-data.frame(time=t,y=yc)
+df2<-data.frame(time=n4*dt4,y=ys4) 
+# Plotando o gráfico com ggplotly
+p<-ggplot(df11,aes(time,y))+geom_line()+geom_point(data=df2,aes(time,y))+theme_bw()+xlab("tempo")+ylab("amplitude")
+ggplotly(p)
+```
+
+#### Subamostragem
+```{R}
+# Subamostrando o sinal = reduzindo o número de amostras (observe o parâmetro by=10)
+indx <- seq(from=1,to=length(df1$Time), by=10)
+df2 <- data.frame(time=df1$Time[indx], y1 = df1$EMG1[indx])
+
+dygraph(data.frame(time=df2$time, y1 = df2$y1, y2=df2$y1), group="EMG") %>%
+    dyRangeSelector()%>%
+    dySeries("y1",stemPlot=TRUE)
+```
+
+```{R}
+# Descartando 4 amostras a cada 5 do sinal anterior, fazendo com que o número de amostras reduza
+i <- seq(from = 1, to = tf*fs+1, by = 5) # índices, descartando 4 amostras a cada 5
+
+dt <- 1/1000
+dygraph(data.frame(tn = t[i], yn = y[i], yns = y[i]), xlab = "tempo (em segundos)", ylab = "amplitude", main = "Sinal Subamostrado a 200 Hz")%>%dySeries(stemPlot=TRUE)%>%dyRangeSelector(c((517-1)*dt,(600-1)*dt))
+```
+
+#### Aumentando o número de amostras
+```{R}
+# Aumentando o número de amostras com interpolação
+library(ggplot2)
+
+# Definição da frequência de amostragem em Hz
+fs1 <- 50
+
+# Definição intervalo entre as amostras em segundos
+dt1 <- 1/fs1
+
+# Definição do vetor de tempo (em segundos)
+t1 <- seq(0, 10, by=dt1) 
+
+# Definição de um sinal senoidal
+f1 <- 3 # frequência de oscilação da senoide
+y1 <- sin(2*pi*f1*t1)
+
+# Criando um data frame (é muito importante trabalhar com data frames no R!)
+
+df1 <- data.frame(t1, y1) 
+
+g <- ggplot(data = df1, aes(x = t1, y=y1)) + 
+     ggplot2::geom_line() +
+     ggplot2::geom_point() +
+     ggplot2::theme_bw()  +
+     ggplot2::xlab("tempo (s)") +
+     ggplot2::ylab("amplitude")
+print(g)
+```
+
+```{R}
+# Alterando a frequência de amostragem para 25 Hz
+fs2 <- 25 # frequência de amostragem em Hz
+dt2 <- 1/fs2 # resolução temporal em segundos
+t2 <- seq(0, 10, by=dt2) # tempo
+f2 <- 3 # frequência de oscilação da senoide
+y2 <- sin(2*pi*f2*t2)
+df2 <- data.frame(t2, y2) # Criando um data frame
+
+g <- ggplot(data = df2, aes(x = t2, y=y2)) + 
+     ggplot2::geom_line() +
+     ggplot2:: geom_point() + 
+     ggplot2::theme_bw()  +
+     ggplot2::xlab("tempo (s)") +
+     ggplot2::ylab("amplitude")
+print(g)
+```
+
+```{R}
+# Alterando a frequência de amostragem para 5 Hz
+fs3 <- 5 # frequência de amostragem em Hz
+dt3 <- 1/fs3 # resolução temporal em segundos
+t3 <- seq(0, 10, by=dt3) # tempo
+f3 <- 3 # frequência de oscilação da senoide
+y3 <- sin(2*pi*f3*t3)
+df3 <- data.frame(t3, y3) # Criando um data frame
+
+g <- ggplot(data = df3, aes(x = t3, y=y3)) + 
+     ggplot2::geom_line() +
+     ggplot2:: geom_point() + 
+     ggplot2::theme_bw()  +
+     ggplot2::xlab("tempo (s)") +
+     ggplot2::ylab("amplitude")
+print(g)
+```
+
+```{R}
+library(dygraphs)
+
+#criando um vetor de tempo único, que contenha todos os instantes dos sinais gerados
+tt <- dplyr::union(df1$t1, df2$t2)
+tt <- dplyr::union(tt, df3$t3)
+tt <- sort(tt) #ordenando o tempo em ordem crescente
+
+# Criando um data frame para facilitar a plotagem de gráficos com eixos temporais distintos
+#criando o data frame (incializando cada um dos vetores no data frame)
+df5 <- data.frame(time=tt)
+df5$y1 <- NA
+df5$y2 <- NA
+df5$y3 <- NA
+head(df5) # visualizando as primeiras linhas do data frame que foi criado
+```
+
+```{R}
+#preenchendo cada vetor no data frame
+
+df5$y1[ tt %in% df1$t1 ] <- df1$y1
+df5$y2[ tt %in% df2$t2 ] <- df2$y2
+df5$y3[ tt %in% df3$t3 ] <- df3$y3
+
+
+dygraph(df5) %>%
+  dyRangeSelector() %>%
+  dyOptions(drawPoints = TRUE,connectSeparatedPoints=TRUE, pointSize = 2)%>%
+  dyHighlight(highlightCircleSize = 5, 
+              highlightSeriesBackgroundAlpha = 0.2,
+              hideOnMouseOut = FALSE)
+```
+
+```{R}
+# Interpolação ------------------------------------------------------------
+
+tempo_do_sinal_original <-  df3$t3
+amplitude_do_sinal_original <- df3$y3
+tempo_discreto_desejado <- df1$t1
+
+#data frame contendo o resultado da interpolação
+df4 <- data.frame(spline(x=tempo_do_sinal_original, 
+                         y = amplitude_do_sinal_original, 
+                         xout = tempo_discreto_desejado))
+
+amplitude_do_sinal_interpolado <- df4$y
+tempo_do_sinal_interpolado <- df4$x
+
+tt <- union(tempo_do_sinal_original, tempo_do_sinal_interpolado)
+tt <- sort(tt) 
+
+df6 <- data.frame(time=tt)
+df6$y1 <- NA
+df6$y2 <- NA
+
+df6$y1[tt %in% tempo_do_sinal_original]<- amplitude_do_sinal_original
+df6$y2[tt %in% tempo_do_sinal_interpolado]<- amplitude_do_sinal_interpolado
+
+
+dygraph(df6, main = "Interpolação") %>%
+  dyRangeSelector() %>%
+  dyOptions(drawPoints = TRUE,connectSeparatedPoints=TRUE, pointSize = 2)%>%
+  dyHighlight(highlightCircleSize = 5, 
+              highlightSeriesBackgroundAlpha = 0.2,
+              hideOnMouseOut = FALSE)
+```
+
+```{R}
+# Exemplo de interpolação utilizando splines
+
+library(ggplot2)
+library(plotly)
+
+fs <- 500 # Hz
+dt <- 1/fs # sec
+
+tf <- 5 # sec
+
+t <- seq(from=0, to=tf, by = dt)
+y <- sin(2*pi*t * 10)
+
+fs1 <- 100 #Hz
+dt1 <- 1/fs1
+t1 <- seq(from=0, to=tf, by=dt1)
+
+y1 <- spline(x=t,y =y,xout =t1)
+
+
+
+df <- data.frame(t, y)
+df1 <- data.frame(time = t1, y1$y)
+
+
+p <- ggplot()
+
+p <- p + geom_line(data = df, aes(x = t, y = y), color = "red" ) + 
+                   geom_point(data = df, aes(x = t, y = y), color = "red" )
+   
+
+p <- p + geom_point(data = df1, aes(x = time, y = y1.y)) + 
+  geom_line(data = df1, aes(x = time, y = y1.y))
+
+ggplotly(p) # produz um gráfico interativo (disponível na biblioteca plotly)
+```
+
+### Exercício 2
+> Utilize o R para ilustrar, em um mesmo gráfico, os conceitos de sinais analógico e discreto.
+
+```{R}
+library(dygraphs)
+library(ggplot2)
+
+fs <- 500 # frequência de amostragem em Hz
+dt <- 1/fs # resolução temporal em segundos
+tf <- 5 # tempo final em segundos
+t <- seq(from = 0, to = tf, by = dt) # vetor de tempo
+f <- 5 # frequência de oscilação
+# Cossenoides
+y <- cos(2*pi*f*t)
+y2 <- cos(2*pi*f*t)
+dygraph(data.frame(time=t, y, y2),
+ xlab = "Tempo (s)",
+ ylab = "Amplitude",
+ main = "Sinal Analógico x Sinal Discreto")%>%
+ dyRangeSelector(dateWindow = c((100)*dt, (300)*dt))%>%
+ dySeries("y2",color = "#ff308c",stemPlot=FALSE, label = "Sinal Analógico")%>%
+ dySeries("y",color = "#33dd88",stemPlot=TRUE, label = "Sinal Discreto")
+```
+
+### Exercício 3
+> Explique os passos necessários para fazer a detecção de picos em uma série temporal.
+
+```{R}
+# Declarando as bibliotecas que serão utilizadas no código
+library(ggplot2)
+library(dygraphs)
+library("reshape2")
+library(pracma)
+library(dplyr)
+library(htmltools)
+library(gganimate)
+
+fs <- 50 # frequência de amostragem em Hz
+dt <- 1/fs # resolução temporal em segundos
+tf <- 5 # tempo final em segundos
+t <- seq(from = 0, to = tf, by =dt) # vetor do tempo
+f <- 2 # frequência de oscilação da senoide
+y <- sin(2*pi*f*t) # função da senoide
+v1 <- rep(NA, length(t))
+v1 <- y
+dfq3 <- data.frame(v1, t) # criando um data frame com t e v1
+th <- max(dfq3$v1)*0.7 # definindo o limiar
+pp <- findpeaks(dfq3$v1, minpeakheight=th) # encontrar picos
+indxpeaks <- pp[ , 2] # retornando a coluna da matriz que contem os índices dos picos
+dfq3$peaks <- NA # vetor com dados faltantes 
+dfq3$peaks[indxpeaks] <- dfq3$v1[indxpeaks]
+# plotando
+d1 <- dygraph(dfq3)%>%
+ dySeries("v1",stemPlot=TRUE)%>%
+ dyAxis("y", valueRange = c(-1.5, 1.5)) %>%
+ dyLegend(width = 200)%>%
+ dyLimit(th, "Max",
+ strokePattern = "solid", color = "orange")%>%
+ dyRangeSelector()
+d2 <- dygraph(dfq3[c("t", "peaks")], main="Eventos discretos")%>%
+ dySeries("peaks",stemPlot=TRUE)%>%
+ dyAxis("y", valueRange = c(-1.5, 1.5)) %>%
+ dyLegend(width = 200)%>%
+ dyLimit(th, "Max",
+ strokePattern = "solid", color = "black")%>%
+ dyRangeSelector()
+dy_graph <- list(d1,d2)
+htmltools::browsable(htmltools::tagList(dy_graph))
+```
+
+### Exercício 4
+> Gere um gráfico qualquer que represente um evento discreto ao longo do tempo.
+
+```{R}
+library(dplyr)
+library(dygraphs)
+
+fs <- 1000
+dt <- 1/fs
+ti <- 10
+tf <- 20
+t <- seq(from=ti, to=tf, by=dt)
+# Secante
+y <- 1/(cos(2*pi*f*t))
+# Plotando o gráfico
+dygraph(data.frame(time=t, y),
+ xlab = "Tempo (s)",
+ ylab = "Amplitude",
+ main = "Evento discreto ao longo do tempo")%>%
+ dySeries("y",color = "#8a2be2", stemPlot=T)
+```
+
+### Exercício 5
+> O erro de quantização pode ser simulado utilizando funções de arredondamento. Para saber mais sobre essas funções, digite na linha de comando do R o comando: help(“ceiling”). Faça um programa no R que execute os seguintes passos:
+
+>> a. Carregue o arquivo de dados coletados (em sala de aula) com sensores inerciais;
+
+```{R}
+library(openxlsx)
+library(dygraphs)
+library(htmltools)
+df1 <- read.xlsx("Aduccao.xlsx", sheet = 1, startRow = 1, skipEmptyRows = FALSE)
+
+```
+>> b. Selecione uma variável e aplique sobre ela a função ceileing;
+
+```{R}
+df1.2 <- data.frame(time = df1$`[Time]`, G1.X = df1$`[G1.X]`)
+df1.3 <- data.frame(time = df1$`[Time]`, G1.X = ceiling(df1$`[G1.X]`))
+df1.4 <- data.frame(time = df1$`[Time]`, dif = (df1.2$G1.X - df1.3$G1.X))
+```
+>> c. Gere um gráfico que mostre a forma de onda da variável selecionada (x1), do resultado da função ceiling (x2), e da diferença entre as duas variáveis (y = x1-x2).
+
+```{R}
+d1 <- dygraph(df1.2)
+d2 <- dygraph(df1.3)
+d3 <- dygraph(df1.4)
+d5 <- dygraph(c(df1.2, df1.3, df1.4))
+dy_graph <- list(d5, d1, d2, d3)
+htmltools::browsable(htmltools::tagList(dy_graph))
+```
+
+### Exercício 6
+> Implemente no R o exemplo que ilustra o conceito de “aliasing” abordado no vídeo “Aliasing: an introduction”.
+
+```{R}
+# No video apresentado foi mostrado o efeito aliasing por meio de uma senoide de 1Hz
+library(ggplot2)
+library(plotly)
+fs <- 50
+dt <- 1/fs
+t <- seq(from = 0, to = 10, by = dt)
+f <- 1
+ys <- sin(2*pi*f*t)
+p<-ggplot(data.frame(t,ys),aes(t,ys))+geom_line(colour = '#ffdfba')+theme_bw()+xlab("Tempo")+ylab("Amplitude")
+ggplotly(p)
+```
+
+```{R}
+# A escolha da frequência do sinal foi apropriada, sendo maior do que o dobro da frequência
+fs2 <- 15
+dt2 <- 1/fs2
+nmax2 <- floor(10/dt2)
+n2 <- 0:nmax2 # vetor com os números de amostras
+ys2 <- sin(2*pi*f*n2*dt2) #sinal amostrado
+# Plotando o sinal
+p<-ggplot(data.frame(n2*dt2,ys2),aes(n2*dt2,ys2))+geom_line(colour = '#bae1ff')+geom_point(colour = '#ffb3ba')+theme_bw()+xlab(
+ "tempo")+ylab("amplitude")
+ggplotly(p)
+```
+
+```{R}
+# O vídeo mostrou que a da frequencia de amostragem escolhida não foi adequada
+fs3 <- 0.55 # frequência de amostragem menor que 2Hz
+dt3 <- 1/fs3 # resolução temporal
+nmax3 <- floor(10/dt3)
+n3 <- 0:nmax3 # vetor com os números de amostras
+ys3 <- sin(2*pi*f*n3*dt3) # sinal amostrado
+
+df1<-data.frame(time=t, y=ys)
+df2<-data.frame(time=n3*dt3,y=ys3)
+
+p<-ggplot(df1,aes(time,y))+geom_line(colour = '#b967ff')+geom_point(data=df2,aes(time,y),colour='#01cdfe')+theme_bw()+xlab("Tem
+po")+ylab("Amplitude")
+
+# Traçando a senoide formada pelo efeito aliasing
+yc = -sin(2*pi*0.1*t)
+df1<-data.frame(time=t,y=yc)
+df2<-data.frame(time=n3*dt3,y=ys3)
+
+p<-ggplot(df1,aes(time,y))+geom_line(colour='#b967ff')+geom_point(data=df2,aes(time,y),colour='#05ffa1')+theme_bw()+xlab("Tem
+po")+ylab("Amplitude")
+ggplotly(p)
+```
+
+### Exercício 7
+> Exemplifique por meio de um programa no R como podemos realizar a reamostragem de sinais por meio da interpolação.
+
+```{R}
+library(ggplot2)
+library(plotly)
+
+fs <- 1000
+dt <- 1/fs #resolução temporal
+tf <- 10 # tempo final
+t <- seq(from=0, to=tf, by = dt)
+
+y <- 15*sin(2*pi*t) #senóide
+
+# Interpolação:
+fs1 <- 100 #frequências de amostragem emHz
+dt1 <- 1/fs1 # resolução temporal
+t1 <- seq(from=0, to=tf, by=dt1) #vetor de tempo
+# Interpolando com spline
+y1 <- spline(x=t,y =y,xout =t1)
+
+df <- data.frame(t, y)
+df1 <- data.frame(time = t1, y1$y)
+# Plotando
+s <- ggplot()
+s <- s + geom_line(data = df, aes(x = t, y = y), color = "#ff71ce" ) +
+ geom_point(data = df, aes(x = t, y = y), color = "#ff71ce" )
+s <- s + geom_point(data = df1, aes(x = time, y = y1.y), color = "#559900") +
+ geom_line(data = df1, aes(x = time, y = y1.y), color = "#559900")
+ggplotly(s)
+```
+
+### Exercício 8
+> Qual a finalidade da função “union” utilizada em alguns exemplos deste tutorial? Exemplifique o uso da mesma.
+
+```{R}
+# Em algumas situações, ara que o gráfico seja gerado, é necessário criar um vetor de tempo discreto único, que contenha todos os instantes de tempo em que as amostras de sinais distintos acontecem. É justamente por isso que a função union é utilizada. 
+
+library(ggplot2)
+library(dygraphs)
+
+## Sinal 1 
+
+fs1 <- 30
+dt1 <- 1/fs1
+t1 <- seq(0, 5, by=dt1)
+f1 <- 2
+y1 <- sin(5*pi*f1*t1)
+
+## Sinal 2 
+fs2 <- 70
+dt2 <- 1/fs2
+t2 <- seq(0, 5, by=dt2)
+f2 <- 2
+y2 <- sin(5*pi*f2*t2)
+
+## Sinal 3
+fs3 <- 110
+dt3 <- 1/fs3
+t3 <- seq(0, 5, by=dt3)
+f3 <- 2
+y3 <- sin(5*pi*f3*t3)
+
+# Criação dos data frame
+df1 <- data.frame(t1, y1)
+df2 <- data.frame(t2, y2)
+df3 <- data.frame(t3, y3)
+# Criação de vetor com todos os intantes dos sinais
+tt <- dplyr::union(df1$t1, df2$t2)
+tt <- dplyr::union(tt, df3$t3)
+# Ordenando o tempo em ordem crescente
+tt <- sort(tt)
+# Criação de um data frame unico
+df5 <- data.frame(time=tt)
+df5$y1 <- NA
+df5$y2 <- NA
+df5$y3 <- NA
+# Inserindo os vetores no data frame
+df5$y1[ tt %in% df1$t1 ] <- df1$y1
+df5$y2[ tt %in% df2$t2 ] <- df2$y2
+df5$y3[ tt %in% df3$t3 ] <- df3$y3
+dygraph(df5) %>%
+ dyRangeSelector() %>%
+ dyOptions(drawPoints = TRUE,connectSeparatedPoints=TRUE, pointSize = 2)%>%
+ dyHighlight(highlightCircleSize = 5,
+ highlightSeriesBackgroundAlpha = 0.2,
+ hideOnMouseOut = FALSE)
+
+```
+
+### Exercício 9
+> Dado o trecho de código abaixo:
+
+>> a. Estude e explique cada uma das linhas de código.
+
+```{R}
+library("reshape2") #carregando a bliblioteca reshape2
+library(ggplot2) #carregando a bibliotea ggplot2
+library(gganimate) #carregando a biblioteca gganimate
+library(dplyr) #carregando a biblioteca dplyr
+
+
+# Data generation ---------------------------------------------------------
+
+fs <- 100 #frequência de amostragem em Hertz
+dt <- 1/fs #resolução temporal em segundos
+tf <- 5 # duração em segundos
+t <- seq(from = 0, to = tf, by =dt)#vetor do tempo em segundos
+f <- 1 # frequência de oscilação da senoide
+y <- sin(2*pi*f*t) #função da senóide
+
+
+
+fs1 <- 30 # reduzindo a taxa de amostragem
+dt1 <- 1/fs1 # resolução temporal em segundos para a frequência de amostragem reduzida
+t1 <- seq(from = 0, to = tf, by =dt1)#vetor do tempo para a frequência de amostragem reduzida
+
+y2 <- sin(2*pi*f*t1)# função da senóide
+
+# unindo vetores de tempo (repetições são excluídas, de forma que apenas um valor é mantido)
+# e ordenando o vetor de tempo resultante
+tt <- union(t, t1) #unindo vetores de tempo t e t1
+tt <- sort(tt) #ordenando a união entre os vetores de tempo
+
+#preenchendo vetores com NA e deixando-os com o tamanho do vetor resultante da união
+v1 <- rep(NA, length(tt))
+v2 <- rep(NA, length(tt))
+
+#preenchendo os vetores v1 e v2 com valores comuns de tt e t e tt e t1, armazenando em y e y2 respectivamente
+v1[ (tt %in% t) == TRUE ] <- y 
+v2[ (tt %in% t1) == TRUE ] <- y2
+
+#plotando um dataframe com tt, v1 e v2
+dfplot <- data.frame(t = tt, v1, v2)
+dfplotm <- melt(dfplot, id="t")  #(para plotar séries multiplas de forma mais simples)
+
+
+# Gráfico estático --------------------------------------------------------
+
+
+theme_set(theme_bw()) #definindo um tema preto e branco com a biblioteca ggplot2
+
+p <- ggplot(dfplotm,
+            aes(x=t, y=value, colour = variable)) +
+  geom_line(data=dfplotm[!is.na(dfplotm$value),]) +
+  geom_point(data=dfplotm[!is.na(dfplotm$value),],
+             aes(shape=variable, size = variable, alpha = variable)) +
+  scale_size_manual(values=c(3.2,2.8)) +
+  scale_alpha_manual(values = c(0.5,1)) + 
+  scale_shape_manual(values = c(1, 16)) #definindo o tipo de gráfico e suas características
+print(p)
+#Gráfico plotado com ggplot, sendo definidos o dataframe a ser plotado, as coordenadas e suas respectivas cores.
+#Além disso, foi definido o gráfico plotado de forma contínua e discreta, suas escalas. Por fim, imprime-se o gráfico.
+```
+
+>> b. Qual conceito está ilustrado na animação?
+
+```{R}
+## O conceito ilustrado na animação é o de resolução temporal. Isso se deve ao fato de que quando a frequência de amostragem diminui, a resolução temporal aumenta. Esta relação pode ser observada no gráfico.
+```
+
+>> c. Qual cor de linha representa um sinal contínuo?
+
+```{R}
+## A linha vermelha, já que possui uma resolução temporal bem pequena.
+```
+
+>> d. Qual símbolo representa um sinal discreto?
+
+```{R}
+## O símbolo que representa um sinal discreto é o x[n]. No entando, este tipo de sinal é representado em gráficos por meio de pontos.
+```
+
+>> e. Qual a resolução temporal dos sinais v1 e v2?
+
+```{R}
+## v1 = 0,01 segundos; v2 = 0,03 segundos
+```
+
+>> f. Qual sinal, v1 ou v2, possui a maior frequência de oscilação?
+
+```{R}
+## Ambos possuem a mesma frequência de oscilação, 1 Hz.
+```
+
+>> g. Qual a implicação prática do sinal v1 ter sido amostrado a uma taxa de frequência maior do que a do sinal v2?
+
+```{R}
+## Isso fez com que ele se tornasse, praticamente, um sinal contínuo. Sendo assim, este sinal pode ser utilizado para passar pelo processo de subamostragem.
+
+```
+
+>> h. Os sinais foram amostrados de acordo com a frequência de Nyquist?
+
+```{R}
+## A frequência de Nyquist é duas vezes o valor da frequência do sinal, sendo a frequência amostral maior do que este valor. Para v1, o exemplo utilizou 100 Hz para frequência de amostragem e 30 Hz para a frequência de amostragem de v2. Ambos os sinais possuem frequência de oscilação igual a 2 Hz. A amostragem de v1 não foi adequada pois ultrapassou a frequência de Nyquist enquanto que a amostragem de v2 foi adequada.
+```
+
+>> i. As amostras dos sinais v1 e v2 acontecem em um mesmo tempo discreto? Justifique.
+
+```{R}
+## Sabendo que o tempo pode ser calculado através da multipicação entre tempo discreto e resolução temporal e considerando t = 5s para v1 e v2, tem-se que o tempo discreto para v1 é igual a 500 e para v2 é igual a 66.7, sendo, portanto, tempos discretos diferentes.
+```
+
+>> j. Qual o valor de pico a pico dos sinais v1 e v2?
+
+```{R}
+## O valor de pico a pico dos sinais v1 e v2 é 2.
+```
+
+>> k. Qual o valor do pico e do vale dos sinais v1 e v2?
+
+```{R}
+## O valor de pico de v1 e v2 é 1, enquanto que o valor do vale em módulo é igual a 1
+```
+
+>> l. Como poderíamos estimar um amostra em um tempo discreto inicialmente não existente no sinal v2?
+
+```{R}
+# Através da média da amplitude de amostras vizinhas ou do uso de modelos polinomiais que estimam os pontos faltantes baseado na construção de modelos localizados de segmentos dos sinais digitais.
+
+```

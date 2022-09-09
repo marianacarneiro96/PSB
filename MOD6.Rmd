@@ -1,0 +1,238 @@
+---
+title: " Lista do Módulo 6"
+author: "Mariana Soares Carneiro - 11811EBI012"
+output: 
+  html_document:
+    highlight: tango
+    includes:
+      after_body: psbfix.html
+---
+
+# Módulo 6
+
+### Exercício 1
+> Utilize o software Audacity para gravar cinco sinais de voz com o comando “sim” e outros cinco sinais com o comando “não”. Faça a rotulação de cada segmento dos comandos de voz, salvando-os em arquivos distintos. No total, dez arquivos devem ser gerados.
+
+```{R}
+library(dygraphs)
+library(htmltools)
+library(tuneR)
+strPath <- "C://Users//Mariana//Documents//PSB//"#diretório de trabalho
+# criando uma lista com os arquivos gravados com o Audacity
+fileNames <- list("sim1.wav","sim2.wav","sim3.wav","sim4.wav","sim5.wav","nao1.wav","nao2.wav","nao3.wav","nao4.wav","nao5.wav")
+fileNames <- as.list(paste(strPath,fileNames, sep = "")) # unindo diretório aos nomes dos arquivos
+#Plotando os sinais .wav
+plotWAV <- function(fname){
+  
+  originalSound <- readWave(fname)
+  
+  fs = originalSound@samp.rate # frequência em Hz
+  dt = 1/fs # resolução temporal em segundos
+  
+  yl <- originalSound@left
+  yr <- originalSound@right
+  
+  tf <- (length(yl)-1)*dt # tempo final em segundos
+  t <- seq(from=0, to=tf, by=dt)
+  
+  df <- data.frame(time=t, yl, yr)
+  
+  pp <- dygraph(df, main= basename(fname)) %>% dyRangeSelector()
+  
+  return(pp)
+}
+#aplicando função a uma lista
+dy_graph <- list(lapply(fileNames, plotWAV)) # efinalizando lista
+htmltools::browsable(htmltools::tagList(dy_graph)) #Plotando os gráficos
+```
+
+### Exercício 2
+> Para cada sinal calcule as estatísticas: média, variância, coeficiente de assimetria e curtose. Organize os resultados em uma tabela (no R) e estime a variância de cada estatística.
+
+```{R}
+library(tuneR)
+library(dygraphs)
+library(htmltools)
+library(moments)
+library(e1071)
+# Criando função que faz a leiitura dos sinais .wav e calcula a função autocorrelação (AFC)
+read_wav_afc <- function(fname){
+ originalsound <- readWave(fname)
+
+ fs = originalsound@samp.rate
+
+ dt = 1/fs
+
+ canal1 <- originalsound@left
+ canal2 <- originalsound@right
+
+ tf <- (length(canal1)-1)*dt
+ t <- seq(from=0, to=tf, by=dt)
+
+ df <- data.frame(time=t, canal1, canal2)
+
+ pp <- dygraph(df, main = basename(fname)) %>% dyRangeSelector()
+ name <- basename(fname)
+ acf(canal1, ylab = name, lag.max = 1000, plot = TRUE)
+
+ return(pp)
+}
+dy_graph <- list(lapply(fileNames, read_wav_afc))
+```
+
+```{R}
+# Fazendo para os áudios contendo a palavra sim
+strPath <- "C://Users//Mariana//Documents//PSB//"
+Fname <- list("sim1.wav","sim2.wav","sim3.wav","sim4.wav","sim5.wav")
+strFile1 <- paste(strPath,Fname[[1]], sep = "")
+strFile2 <- paste(strPath,Fname[[2]], sep = "")
+strFile3 <- paste(strPath,Fname[[3]], sep = "")
+strFile4 <- paste(strPath,Fname[[4]], sep = "")
+strFile5 <- paste(strPath,Fname[[5]], sep = "")
+ysound1 <- readWave(strFile1)
+ysound2 <- readWave(strFile2)
+ysound3 <- readWave(strFile3)
+ysound4 <- readWave(strFile4)
+ysound5 <- readWave(strFile5)
+SIM1 <- ysound1@left
+SIM2 <- ysound2@left
+SIM3 <- ysound3@left
+SIM4 <- ysound4@left
+SIM5 <- ysound5@left
+estatistica <- function(sinal){
+ Media <- mean(sinal)
+ Variancia <- var(sinal)
+ Assimetria <- skewness(sinal)
+ Curtose <- kurtosis(sinal)
+ dt_est <- data.frame(Media,Variancia,Assimetria,Curtose)
+}
+tabela <- rbind(estatistica(SIM1), estatistica(SIM2), estatistica(SIM3), estatistica(SIM4), estatistica(SIM5))
+print(tabela)
+```
+
+> O comando “sim” é estacionário? Justifique.
+
+#### O comando sim não é estacionário. Para que um processo seja denominado como estacionário, suas propriedades estatísticas não variam em função do tempo. No caso dos gráficos referentes aos "sim" há variação em função do tempo.
+
+> O comando "sim" é ergótico? Justifique
+
+#### Não. Para que um sistema seja considerado ergótico ao estimar uma propriedade estatística o valor encontrado para as janelas distintas do sinal deve ser semelhante, com variância tendendo a zero. No caso estudado as médias das janelas possuem valores bem diferentes e a variância não tende a zero.
+
+```{R}
+# Fazendo para os áudios contendo a palavra sim
+strPath <- "C://Users//Mariana//Documents//PSB//"
+Fname <- list("nao1.wav","nao2.wav","nao3.wav","nao4.wav","nao5.wav")
+strFile6 <- paste(strPath,Fname[[1]], sep = "")
+strFile7 <- paste(strPath,Fname[[2]], sep = "")
+strFile8 <- paste(strPath,Fname[[3]], sep = "")
+strFile9 <- paste(strPath,Fname[[4]], sep = "")
+strFile10 <- paste(strPath,Fname[[5]], sep = "")
+ysound6 <- readWave(strFile6)
+ysound7 <- readWave(strFile7)
+ysound8 <- readWave(strFile8)
+ysound9 <- readWave(strFile9)
+ysound10 <- readWave(strFile10)
+NAO1 <- ysound6@left
+NAO2 <- ysound7@left
+NAO3 <- ysound8@left
+NAO4 <- ysound9@left
+NAO5 <- ysound10@left
+estatistica <- function(sinal){
+ Media <- mean(sinal)
+ Variancia <- var(sinal)
+ Assimetria <- skewness(sinal)
+ Curtose <- kurtosis(sinal)
+ dt_est <- data.frame(Media,Variancia,Assimetria,Curtose)
+}
+tabela <- rbind(estatistica(NAO1), estatistica(NAO2), estatistica(NAO3), estatistica(NAO4), estatistica(NAO5))
+print(tabela)
+```
+
+> O comando “não” é estacionário? Justifique.
+
+#### Não. Assim como acontece com o comando sim, os coeficientes de autocorrelações variam ao longo do tempo, tendo periodicidade e não estacionaridade.
+
+> O comando "não" é ergótico? Justifique.
+
+#### Não. Assim como acontece com o comando sim, os valores das médias das janelas são bem diferentes e a variância não tende a zero.
+
+
+
+### Exercício 4
+> Considerando a avaliação de três grupos neurônios, com as características abaixo:
+
+. E1: média de disparo = 53 ms; desvio padrão = 50 ms
+. E2: média de disparo = 100 ms; desvio padrão = 35 ms
+. E3: média de disparo = 53 ms; desvio padrão = 15 ms
+Dica: o intervalo entre disparos é um processo pontual com distribuição gaussina (Utilize a função rnorm do R para gerar os tempos de disparo)
+
+> 4.1 Plote o diagrama de disparos dos três grupos de neurônios, durante 10 segundos, de acordo com as regras dadas na tabela, cujo valores numéricos indicam os tempos de início e término (em segundos) dos disparos dos grupos E1, E2 e E3. Exemplo: O grupo E1 dispara entre 1 e 2 s, entre 5 e 7 s, e permanence em repouso durante todo o intervalo de simulação (de 0 a 10 segundos). A simulação deverá ser feita com uma taxa de amostragem de 10 kHz.
+
+```
+Grupo de neurônios	1	2	3	4	5	6	7	8	9	10
+       E1          	x	x			x	x	x			
+       E2		          x	x	x			x	x	x	
+       E3	          x	x	x						x	x
+```
+
+
+```{R}
+library(dygraphs)
+fs <- 10000
+dt <- 1/fs
+#  vetor no intervalo de tempo
+delt_time <- seq(from=0, to=10, dt)
+#  Dataframe no intervalo de tempo, canais em repouso
+df <- data.frame(time = delt_time, E1 = 0, E2 = 0, E3 = 0)
+
+# Canal 1:
+index<- which((df$time >= 1 & df$time <= 2) | (df$time >= 5 & df$time <= 7))
+tam <- length(index)
+df$E1[index] <- rnorm(tam, mean = 53, sd = 50)
+#-------------------------------------------------------------------------
+# Canal 2:
+index <- which(df$time >= 2 & df$time <= 4 | df$time >= 7 & df$time <= 9)
+tam <- length(index)
+df$E2[index] <- rnorm(tam, mean = 100, sd = 35)
+#-------------------------------------------------------------------------
+# Canal 3:
+index <- which(df$time >= 1 & df$time <= 3 | df$time >= 9 & df$time <= 10)
+tam <- length(index)
+df$E3[index] <- rnorm(tam, mean = 53, sd = 15)
+```
+
+> 4.2 Gere os histogramas dos intervalos entre disparos para os grupos de neurônios E1, E2 e E3. Devem ser
+gerados três histogramas (um para cada grupo).
+
+
+```{R}
+# Histograma do grupo E1
+hist(df$E1,
+ main="Histograma E1",
+ xlab="Intervalo entre os disparos",
+ ylab="Frequência",
+ col="#b2ffb2",
+)
+```
+
+
+```{R}
+# Historgrama do grupo E2
+hist(df$E2,
+ main="Histograma E2",
+ xlab="Intervalo entre os disparos",
+ ylab="Frequência",
+ col="#1face2"
+)
+```
+
+
+```{R}
+# Histograma do grupo E3
+hist(df$E3,
+ main="Histograma E3",
+ xlab="Intervalo entre os disparos",
+ ylab="Frequência",
+ col="#e8878c",
+)
+```
